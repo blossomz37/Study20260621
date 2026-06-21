@@ -52,7 +52,7 @@ cp <template>/githooks/pre-push .githooks/pre-push
 chmod +x .githooks/pre-push
 git config core.hooksPath .githooks
 ```
-Test it fires by committing a throwaway file containing `/Users/testuser/x` and confirming the hook exits non-zero, then remove that commit.
+Test it fires by committing a throwaway file containing a literal home path (e.g. the macOS form: slash, `Users`, slash, a username, slash) and confirming the hook exits non-zero, then remove that commit.
 
 **Important caveat — not automatic on clone.** `core.hooksPath` is local git config, NOT carried in the repo. Anyone who clones must run `git config core.hooksPath .githooks` themselves. Document this in the project README/AGENTS so collaborators enable it. Bypass for a known-safe push: `git push --no-verify`.
 
