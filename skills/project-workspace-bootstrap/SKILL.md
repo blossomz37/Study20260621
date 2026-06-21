@@ -27,7 +27,8 @@ Scaffold a new project workspace in the correct order. The value of this skill i
    - `workspace/scratch/` — ephemeral notes and ideas.
 4. **Environment.** Create the language environment if applicable (e.g. `python3 -m venv .venv`). Confirm the stack first if unknown.
 5. **Local git.** `git init`, then `git add -A` and an initial commit.
-6. **Remote — LAST.** Only after local commits exist. See the remote checklist below.
+6. **Pre-push safety gate.** Install the versioned hook BEFORE the first push (see below). This screens for leaks every push.
+7. **Remote — LAST.** Only after local commits exist and the gate is installed. See the remote checklist below.
 
 ## Decisions to confirm (don't guess)
 
@@ -35,6 +36,25 @@ Scaffold a new project workspace in the correct order. The value of this skill i
 - **Filenaming convention.** Default: `YYYYMMDD-NN-kebab-case-name.ext` for workspace files (date + daily sequence number + slug). Confirm the user wants enumeration before enforcing it.
 - **Stack/venv.** Confirm the language/runtime before creating an environment.
 - **Hygiene depth.** For short-lived projects, keep hygiene light. For long-lived ones, add a periodic maintenance checklist to `AGENTS.md`.
+
+## Pre-push safety gate
+
+A versioned git hook that blocks a push if the tracked tree contains leaks. Template: `templates/githooks/pre-push`. It screens for:
+- Absolute home paths (`/Users/<anyone>/`, `/home/<anyone>/`) — portable, not tied to one username.
+- `.claude/settings.local.json` being tracked.
+- Tracked `.env` files.
+- Private-key headers and common secret/API-key patterns.
+
+Install (run from repo root):
+```
+mkdir -p .githooks
+cp <template>/githooks/pre-push .githooks/pre-push
+chmod +x .githooks/pre-push
+git config core.hooksPath .githooks
+```
+Test it fires by committing a throwaway file containing `/Users/testuser/x` and confirming the hook exits non-zero, then remove that commit.
+
+**Important caveat — not automatic on clone.** `core.hooksPath` is local git config, NOT carried in the repo. Anyone who clones must run `git config core.hooksPath .githooks` themselves. Document this in the project README/AGENTS so collaborators enable it. Bypass for a known-safe push: `git push --no-verify`.
 
 ## Remote connection checklist
 

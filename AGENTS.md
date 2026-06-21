@@ -50,6 +50,16 @@ All workspace files follow this format: `YYYYMMDD-NN-kebab-case-name.ext`
 - Include: what was done, what's next, any blockers or decisions pending
 - Link to evidence files with full paths
 
+## Pre-push Safety Gate
+
+This repo has a pre-push hook (`.githooks/pre-push`) that blocks pushes containing home paths, secrets, tracked `.env`, or `.claude/settings.local.json`.
+
+**After cloning, enable it once:**
+```
+git config core.hooksPath .githooks
+```
+This setting is local and not carried by the clone. Bypass a known-safe push with `git push --no-verify`.
+
 ## Workspace Hygiene & Maintenance
 
 **Prevent sprawl:**
