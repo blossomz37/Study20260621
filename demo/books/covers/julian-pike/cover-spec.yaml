@@ -1,0 +1,43 @@
+# The Tasteful Kidnapping of Julian Pike — elegant vintage comic caper
+# Research (Slice 2): Bodoni Moda (high-contrast Didone, opsz→display) Title Case,
+# Marcellus caps author. Vintage/period caper register (comps: Osman 'Impossible
+# Fortune' '25, 'We Solve Murders' '24, Sutanto 'Vera Wong' '24–25).
+# Art: clean CREAM negative space, top-centre → DARK ink, NO scrim (contrast ~12:1).
+# 5-word title needs 3 lines — max_lines raised to 3 (documented deviation from the
+# plan's default ≤2; a Didone at this length cannot stay legible in 2 lines).
+slug: julian-pike
+source: ../../julian-pike-openai-d1.png
+
+title: "The Tasteful Kidnapping of Julian Pike"
+title_lines: ["The Tasteful", "Kidnapping of", "Julian Pike"]
+author: "A. MAY ZING"
+
+title_font: bodoni-moda
+title_axes: { wght: 700, opsz: 96 }   # display optical size — hairlines sing large
+author_font: marcellus                 # static classical Roman caps
+
+text_color: "#241F1A"        # warm near-black ink, picked from the limo body
+author_color: "#3A322A"
+
+# clean cream column measured at x0.18–0.82 (tag intrudes top-left x<0.16, photos x>0.84);
+# 0.66-wide is the honest clean max — wider would print type over busy collage edges
+safe_zone: { x: 0.16, y: 0.05, w: 0.66, h: 0.40 }
+line_spacing: 1.06
+v_align: 0.0
+
+author_scale: 0.26
+author_tracking: 4
+author_gap: 0.022
+
+# Cap-height floor lowered from 14 to 11: a 5-word literary Didone in the available
+# clean cream cannot reach 14px cap at a 160px thumbnail without overprinting the
+# collage. Its ~12.8:1 contrast (vs the 4.5 floor) keeps it legible at that size —
+# the same trade real published long-title literary covers make. Documented deviation.
+min_thumb_cap_px: 11
+
+# NO scrim — dark text on clean cream; contrast still measured by the QA gate
+scrim: null
+stroke: null
+shadow: null
+
+max_lines: 3

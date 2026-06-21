@@ -1,0 +1,35 @@
+# The Signal — YA digital / surveillance-adjacent thriller
+# Research (Slice 2) resolved the techno-font GAP in favor of the library:
+# League Spartan (geometric, near-mono stroke) serves; NO out-of-library fetch.
+# Comps (Culpability '25, Watching From Within '25, Darkly '24) show the lane is
+# bold UPPERCASE sans as the hook, not mono/glitch. Author in Montserrat.
+# Art top band (above the monitor wall) is near-black → light title + top scrim.
+slug: the-signal
+source: ../../the-signal-openai-s1.png
+
+title: "The Signal"
+title_lines: ["THE", "SIGNAL"]
+author: "A. MAY ZING"
+
+title_font: league-spartan
+title_axes: { wght: 800 }    # variable defaults to 100 (hairline) — MUST pin
+author_font: montserrat
+author_axes: { wght: 500 }
+
+text_color: "#F2F4F8"        # near-white, sits in the night palette
+author_color: "#C9D2E0"
+
+# top dark band; monitor wall begins ~y0.40, city-glow horizon ~y0.32 — stay above
+safe_zone: { x: 0.08, y: 0.045, w: 0.84, h: 0.19 }
+line_spacing: 1.06
+v_align: 0.0
+
+author_scale: 0.24
+author_tracking: 3
+author_gap: 0.012
+
+scrim: { color: "#04060E", opacity: 0.6, direction: top, extent: 0.30 }
+stroke: { width: 0.03, color: "#04060E" }
+shadow: { blur: 0.12, color: "#000000", opacity: 0.5, offset: 0.015 }
+
+max_lines: 2

@@ -1,0 +1,53 @@
+{
+  "_note": "Font manifest for the cover-typography tool. Binaries in fonts/ are git-ignored; this manifest is the tracked record for reproducibility (family + Google Fonts URL + OFL license). Variable fonts list their axis ranges; compose.py pins the axis explicitly per cover-spec (Pillow renders the axis DEFAULT otherwise — a silent 'bold pick comes out thin' failure).",
+  "fonts": {
+    "anton": {
+      "family": "Anton",
+      "file": "Anton-Regular.ttf",
+      "variable": false,
+      "axes": {},
+      "url": "https://fonts.google.com/specimen/Anton",
+      "license": "OFL-1.1"
+    },
+    "oswald": {
+      "family": "Oswald",
+      "file": "Oswald[wght].ttf",
+      "variable": true,
+      "axes": { "wght": [200, 700] },
+      "url": "https://fonts.google.com/specimen/Oswald",
+      "license": "OFL-1.1"
+    },
+    "league-spartan": {
+      "family": "League Spartan",
+      "file": "LeagueSpartan[wght].ttf",
+      "variable": true,
+      "axes": { "wght": [100, 900] },
+      "url": "https://fonts.google.com/specimen/League+Spartan",
+      "license": "OFL-1.1"
+    },
+    "montserrat": {
+      "family": "Montserrat",
+      "file": "Montserrat[wght].ttf",
+      "variable": true,
+      "axes": { "wght": [100, 900] },
+      "url": "https://fonts.google.com/specimen/Montserrat",
+      "license": "OFL-1.1"
+    },
+    "bodoni-moda": {
+      "family": "Bodoni Moda",
+      "file": "BodoniModa[opsz,wght].ttf",
+      "variable": true,
+      "axes": { "wght": [400, 900], "opsz": [6, 96] },
+      "url": "https://fonts.google.com/specimen/Bodoni+Moda",
+      "license": "OFL-1.1"
+    },
+    "marcellus": {
+      "family": "Marcellus",
+      "file": "Marcellus-Regular.ttf",
+      "variable": false,
+      "axes": {},
+      "url": "https://fonts.google.com/specimen/Marcellus",
+      "license": "OFL-1.1"
+    }
+  }
+}

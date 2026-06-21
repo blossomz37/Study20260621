@@ -1,0 +1,97 @@
+:root {
+  --color-primary: #3a2d28;
+  --color-primary-strong: #241b17;
+  --color-on-primary: #faf6f0;
+  --color-secondary: #9a6a4f;
+  --color-on-secondary: #faf6f0;
+  --color-tertiary: #b8553a;
+  --color-on-tertiary: #faf6f0;
+  --color-neutral: #f7f3ee;
+  --color-surface: #f7f3ee;
+  --color-surface-container: #efe7dd;
+  --color-surface-container-high: #e4d8ca;
+  --color-on-surface: #2a211c;
+  --color-on-surface-variant: #5c5048;
+  --color-outline: #cbbfb2;
+  --color-error: #9a3412;
+  --color-on-error: #faf6f0;
+  --color-cover-ink-light: #f2f6ff;
+  --color-cover-ink-dark: #241f1a;
+  --color-cover-scrim: rgba(4, 6, 14, 0.86);
+  --color-cover-cream-zone: #efe6d2;
+  --type-display-lg: 600 48px/1.05 Fraunces;
+  --type-display-lg-tracking: -0.02em;
+  --type-headline-md: 600 28px/1.1 Fraunces;
+  --type-title-md: 600 22px/1.15 Fraunces;
+  --type-body-md: 400 15px/1.5 Inter;
+  --type-body-sm: 400 13px/1.45 Inter;
+  --type-label-caps: 600 11px/1.2 Inter;
+  --type-label-caps-tracking: 0.08em;
+  --type-label-cta: 600 13px/1 Inter;
+  --type-label-cta-tracking: 0.02em;
+  --type-cover-title: 700 220px/1.04 Anton;
+  --type-cover-title-tracking: 0em;
+  --type-cover-author: 500 58px/1.0 Oswald;
+  --type-cover-author-tracking: 0.12em;
+  --rounded-sm: 4px;
+  --rounded-md: 8px;
+  --rounded-cover: 6px;
+  --rounded-full: 9999px;
+  --space-base: 8px;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 40px;
+  --space-gallery-gap: 24px;
+  --space-cover-aspect: 2 / 3;
+  --space-cover-safe-inset: 96px;
+  --motion-flip: transform 450ms ease;
+  --motion-none: all 0ms linear;
+  --gradient-cover-dark-backdrop: linear-gradient(180deg, #11141c 0%, #2b2620 100%);
+  --gradient-cover-cream-backdrop: linear-gradient(180deg, #efe6d2 0%, #e4d8ca 100%);
+  --shadow-rest: 0 4px 16px 0 rgba(42, 33, 28, 0.14);
+  --shadow-cover-title-glow: 0 0 36px 0 rgba(0, 0, 0, 0.55);
+
+  /* components (resolved from token refs) */
+  --book-flip-perspective: 800px;
+  --book-flip-radius: var(--rounded-cover);
+  --book-flip-shadow: var(--shadow-rest);
+  --book-flip-inner-transition: var(--motion-flip);
+  --book-flip-front-bg: var(--color-surface-container);
+  --book-flip-front-radius: var(--rounded-cover);
+  --book-flip-back-image-radius: var(--rounded-cover);
+  --book-flip-back-info-bg: var(--color-surface-container);
+  --book-flip-back-info-fg: var(--color-on-surface);
+  --book-flip-back-info-font: var(--type-body-md);
+  --book-flip-back-info-radius: var(--rounded-cover);
+  --book-flip-back-info-pad: var(--space-lg);
+  --book-flip-title-fg: var(--color-on-surface);
+  --book-flip-title-font: var(--type-title-md);
+  --book-flip-meta-fg: var(--color-on-surface-variant);
+  --book-flip-meta-font: var(--type-label-caps);
+  --book-flip-cta-bg: var(--color-primary);
+  --book-flip-cta-fg: var(--color-on-primary);
+  --book-flip-cta-font: var(--type-label-cta);
+  --book-flip-cta-radius: var(--rounded-sm);
+  --book-flip-cta-pad: var(--space-md);
+  --book-flip-cta-hover-bg: var(--color-primary-strong);
+  --cover-dark-font: var(--type-cover-title);
+  --cover-dark-fg: var(--color-cover-ink-light);
+  --cover-dark-bg: var(--color-cover-scrim);
+  --cover-dark-backdrop-image: var(--gradient-cover-dark-backdrop);
+  --cover-dark-shadow: var(--shadow-cover-title-glow);
+  --cover-dark-pad: var(--space-cover-safe-inset);
+  --cover-cream-font: var(--type-cover-title);
+  --cover-cream-fg: var(--color-cover-ink-dark);
+  --cover-cream-bg: var(--color-cover-cream-zone);
+  --cover-cream-pad: var(--space-cover-safe-inset);
+}
+
+/* honor the motion token contract: reduced motion collapses duration */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-flip: transform 0ms linear;
+    --motion-none: all 0ms linear;
+  }
+}

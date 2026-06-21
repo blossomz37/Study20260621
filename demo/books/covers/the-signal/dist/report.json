@@ -1,0 +1,70 @@
+{
+  "slug": "the-signal",
+  "title": "The Signal",
+  "author": "A. MAY ZING",
+  "fonts": {
+    "title": {
+      "key": "league-spartan",
+      "axes": {
+        "wght": 800
+      },
+      "license": "OFL-1.1"
+    },
+    "author": {
+      "key": "montserrat",
+      "axes": {
+        "wght": 500
+      },
+      "license": "OFL-1.1"
+    }
+  },
+  "dimensions": {
+    "width": 1600,
+    "height": 2560,
+    "source": [
+      992,
+      1586
+    ],
+    "upscale_factor": 1.613
+  },
+  "ratio": 1.6,
+  "source_ratio": 1.5988,
+  "title_font_px": 346,
+  "title_lines": [
+    "THE",
+    "SIGNAL"
+  ],
+  "thumbnail_cap_height_px": 22.9,
+  "text_contrast": 18.32,
+  "author_contrast": 13.06,
+  "file_sizes_bytes": {
+    "png": 2773153,
+    "jpg": 303655,
+    "webp": 147086
+  },
+  "file_sizes_kb": {
+    "png": 2708.2,
+    "jpg": 296.5,
+    "webp": 143.6
+  },
+  "gates": {
+    "ratio_ok": true,
+    "thumb_cap_ok": true,
+    "contrast_ok": true,
+    "author_contrast_ok": true,
+    "lines_ok": true
+  },
+  "thresholds": {
+    "ratio": 1.6,
+    "ratio_tol": 0.005,
+    "min_thumb_cap_px": 14.0,
+    "min_contrast": 4.5,
+    "max_lines": 2
+  },
+  "result": "PASS",
+  "outputs": {
+    "png": "books/covers/the-signal/dist/the-signal.png",
+    "jpg": "books/covers/the-signal/dist/the-signal.jpg",
+    "webp": "books/covers/the-signal/dist/the-signal.webp"
+  }
+}

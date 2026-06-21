@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BookHub — a flip gallery by A. May Zing</title>
+
+  <!-- THE TRANSFER PROOF: every design value comes from this file, generated from
+       demo/books/DESIGN.md by tools/designmd-export. No brand color, font, radius,
+       timing, or spacing value is hard-coded below — only structural mechanics. -->
+  <link rel="stylesheet" href="../dist/tokens.css">
+
+  <!-- Site chrome uses ONLY Fraunces + Inter (cover display faces are baked into
+       the cover rasters — zero web-font cost for the titles). -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ---- page chrome: structure is mechanics; all VALUES come from tokens.css ---- */
+    * { box-sizing: border-box; }
+    :root {
+      /* These covers are Kindle masters (1600x2560 = 1:1.6), not the system's
+         default 2:3 — a structural fact about THESE assets, not a design value.
+         Box ratio == image ratio so the baked title is never cropped. */
+      --cover-ratio: 1 / 1.6;
+    }
+    body {
+      margin: 0;
+      padding: var(--space-xl);
+      background: var(--color-surface);
+      color: var(--color-on-surface);
+      font: var(--type-body-md);
+      -webkit-font-smoothing: antialiased;
+    }
+    header { max-width: 960px; margin: 0 auto var(--space-xl); }
+    .page-title {
+      font: var(--type-display-lg);
+      letter-spacing: var(--type-display-lg-tracking);
+      margin: 0 0 var(--space-sm);
+    }
+    .page-sub { color: var(--color-on-surface-variant); margin: 0; max-width: 60ch; }
+    .hint {
+      display: inline-block; margin-top: var(--space-md);
+      font: var(--type-label-caps); letter-spacing: var(--type-label-caps-tracking);
+      text-transform: uppercase; color: var(--color-on-surface-variant);
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: var(--space-gallery-gap);
+      max-width: 960px; margin: 0 auto;
+    }
+
+    /* ---- flip card: structure is mechanics; VALUES come from tokens.css ---- */
+    .book-flip {
+      aspect-ratio: var(--cover-ratio);
+      perspective: var(--book-flip-perspective);
+      border-radius: var(--book-flip-radius);
+      box-shadow: var(--book-flip-shadow);
+      cursor: pointer;
+    }
+    .book-flip:focus-visible { outline: 3px solid var(--color-tertiary); outline-offset: 3px; }
+    .book-inner {
+      position: relative; width: 100%; height: 100%;
+      transform-style: preserve-3d;
+      transition: var(--book-flip-inner-transition);   /* <- motion token */
+    }
+    @media (hover: hover) {
+      .book-flip:hover .book-inner { transform: rotateY(180deg); }
+    }
+    .book-flip.is-flipped .book-inner { transform: rotateY(180deg); }
+
+    .book-front, .book-back {
+      position: absolute; inset: 0; overflow: hidden;
+      -webkit-backface-visibility: hidden; backface-visibility: hidden;
+      border-radius: var(--book-flip-radius);
+    }
+    .book-back { transform: rotateY(180deg); }
+
+    /* ---- front: the real baked cover (webp -> jpg). width/height set => no CLS ---- */
+    .book-front { background: var(--book-flip-front-bg); }
+    .book-front img {
+      display: block; width: 100%; height: 100%; object-fit: cover;
+      border-radius: var(--book-flip-radius);
+    }
+
+    /* ---- info back face (parchment panel from books.json) ---- */
+    .book-back-info {
+      width: 100%; height: 100%;
+      background: var(--book-flip-back-info-bg);
+      color: var(--book-flip-back-info-fg);
+      padding: var(--book-flip-back-info-pad);
+      display: flex; flex-direction: column; gap: var(--space-sm);
+    }
+    .book-kicker {
+      margin: 0; font: var(--type-label-caps); letter-spacing: var(--type-label-caps-tracking);
+      text-transform: uppercase; color: var(--color-secondary);
+    }
+    .book-title { margin: 0; font: var(--book-flip-title-font); color: var(--book-flip-title-fg); }
+    .book-meta {
+      font: var(--book-flip-meta-font); color: var(--book-flip-meta-fg);
+      letter-spacing: var(--type-label-caps-tracking); text-transform: uppercase;
+    }
+    .book-blurb {
+      flex: 1 1 auto; min-height: 0; overflow: auto; margin: 0;
+      font: var(--type-body-sm); color: var(--book-flip-back-info-fg);
+    }
+    .book-cta {
+      align-self: flex-start; text-decoration: none; white-space: nowrap;
+      background: var(--book-flip-cta-bg);
+      color: var(--book-flip-cta-fg);
+      font: var(--book-flip-cta-font);
+      letter-spacing: var(--type-label-cta-tracking);
+      border-radius: var(--book-flip-cta-radius);
+      padding: var(--space-sm) var(--book-flip-cta-pad);
+    }
+    .book-cta:hover { background: var(--book-flip-cta-hover-bg); }
+
+    .loading { color: var(--color-on-surface-variant); font: var(--type-body-md); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1 class="page-title">BookHub</h1>
+    <p class="page-sub" id="tagline">A flip gallery of three books by A. May Zing.</p>
+    <span class="hint">Hover · tap · or focus + Enter to flip</span>
+  </header>
+
+  <main class="gallery" id="gallery" aria-label="Book gallery">
+    <p class="loading">Loading the shelf…</p>
+  </main>
+
+  <script>
+    // Build the gallery from books.json, then wire the proven flip interaction.
+    const esc = (s) => String(s).replace(/[&<>"']/g, c =>
+      ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+
+    function cardHTML(b) {
+      const c = b.cover;
+      return `
+      <div class="book-flip" role="button" tabindex="0" data-pin
+           aria-label="${esc(b.title)} by ${esc(b.author)} — flip for details">
+        <div class="book-inner">
+          <div class="book-front">
+            <picture>
+              <source srcset="${esc(c.webp)}" type="image/webp">
+              <img src="${esc(c.jpg)}" width="${c.width}" height="${c.height}"
+                   loading="lazy" decoding="async" alt="${esc(c.alt)}">
+            </picture>
+          </div>
+          <div class="book-back">
+            <div class="book-back-info">
+              <p class="book-kicker">${esc(b.kicker)}</p>
+              <p class="book-title">${esc(b.title)}</p>
+              <div class="book-meta">${esc(b.meta)}</div>
+              <p class="book-blurb">${esc(b.blurb)}</p>
+              <a class="book-cta" href="${esc(b.cta.href)}" onclick="return false">${esc(b.cta.label)}</a>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    function wireFlips() {
+      const isTouch = window.matchMedia('(hover: none)').matches;
+      const tiles = [...document.querySelectorAll('.book-flip')];
+      const closeAll = () => tiles.forEach(t => t.classList.remove('is-flipped'));
+      const toggle = (tile) => {
+        const open = tile.classList.contains('is-flipped');
+        closeAll();
+        if (!open) tile.classList.add('is-flipped');
+      };
+      tiles.forEach(tile => {
+        const wantsClick = isTouch || tile.hasAttribute('data-pin');
+        if (wantsClick) tile.addEventListener('click', (e) => {
+          if (e.target.closest('a, button')) return;   // don't swallow the CTA
+          toggle(tile);
+        });
+        tile.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(tile); }
+          if (e.key === 'Escape') closeAll();
+        });
+      });
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.book-flip')) closeAll();
+      });
+    }
+
+    fetch('../data/books.json')
+      .then(r => r.json())
+      .then(data => {
+        const g = document.getElementById('gallery');
+        if (data.site && data.site.tagline) document.getElementById('tagline').textContent = data.site.tagline;
+        g.innerHTML = data.books.map(cardHTML).join('');
+        wireFlips();
+      })
+      .catch(err => {
+        document.getElementById('gallery').innerHTML =
+          '<p class="loading">Could not load books.json (serve over http, not file://).</p>';
+        console.error(err);
+      });
+  </script>
+</body>
+</html>

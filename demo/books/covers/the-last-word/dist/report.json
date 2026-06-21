@@ -1,0 +1,68 @@
+{
+  "slug": "the-last-word",
+  "title": "The Last Word",
+  "author": "A. MAY ZING",
+  "fonts": {
+    "title": {
+      "key": "anton",
+      "axes": null,
+      "license": "OFL-1.1"
+    },
+    "author": {
+      "key": "oswald",
+      "axes": {
+        "wght": 500
+      },
+      "license": "OFL-1.1"
+    }
+  },
+  "dimensions": {
+    "width": 1600,
+    "height": 2560,
+    "source": [
+      992,
+      1586
+    ],
+    "upscale_factor": 1.613
+  },
+  "ratio": 1.6,
+  "source_ratio": 1.5988,
+  "title_font_px": 371,
+  "title_lines": [
+    "THE LAST",
+    "WORD"
+  ],
+  "thumbnail_cap_height_px": 31.9,
+  "text_contrast": 14.75,
+  "author_contrast": 7.34,
+  "file_sizes_bytes": {
+    "png": 4354058,
+    "jpg": 562423,
+    "webp": 346336
+  },
+  "file_sizes_kb": {
+    "png": 4252.0,
+    "jpg": 549.2,
+    "webp": 338.2
+  },
+  "gates": {
+    "ratio_ok": true,
+    "thumb_cap_ok": true,
+    "contrast_ok": true,
+    "author_contrast_ok": true,
+    "lines_ok": true
+  },
+  "thresholds": {
+    "ratio": 1.6,
+    "ratio_tol": 0.005,
+    "min_thumb_cap_px": 14.0,
+    "min_contrast": 4.5,
+    "max_lines": 2
+  },
+  "result": "PASS",
+  "outputs": {
+    "png": "books/covers/the-last-word/dist/the-last-word.png",
+    "jpg": "books/covers/the-last-word/dist/the-last-word.jpg",
+    "webp": "books/covers/the-last-word/dist/the-last-word.webp"
+  }
+}

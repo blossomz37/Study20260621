@@ -78,3 +78,14 @@ workspace/scratch/**/*.zip
 # Re-include them despite the generic `dist/` rule above.
 !demo/**/dist/
 !demo/**/dist/**
+
+# --- cover-typography tool ---
+# OFL font binaries: copied locally for work; fonts.json is the tracked record.
+tools/cover-typography/fonts/
+tools/cover-typography/.fonts-cache/
+# Large cover MASTER pngs (2.7-5.3MB each) are deterministically regenerable via
+# `compose.py --all`; don't track them (AGENTS: no large binaries). The
+# web-optimized jpg/webp, QA contact sheets, and report.json under dist/ stay tracked.
+demo/books/covers/*/dist/*.png
+!demo/books/covers/*/dist/qa-contact-sheet.png
+.claude/launch.json

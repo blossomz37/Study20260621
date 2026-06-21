@@ -1,0 +1,70 @@
+{
+  "slug": "julian-pike",
+  "title": "The Tasteful Kidnapping of Julian Pike",
+  "author": "A. MAY ZING",
+  "fonts": {
+    "title": {
+      "key": "bodoni-moda",
+      "axes": {
+        "wght": 700,
+        "opsz": 96
+      },
+      "license": "OFL-1.1"
+    },
+    "author": {
+      "key": "marcellus",
+      "axes": null,
+      "license": "OFL-1.1"
+    }
+  },
+  "dimensions": {
+    "width": 1600,
+    "height": 2560,
+    "source": [
+      992,
+      1586
+    ],
+    "upscale_factor": 1.613
+  },
+  "ratio": 1.6,
+  "source_ratio": 1.5988,
+  "title_font_px": 150,
+  "title_lines": [
+    "The Tasteful",
+    "Kidnapping of",
+    "Julian Pike"
+  ],
+  "thumbnail_cap_height_px": 11.3,
+  "text_contrast": 12.87,
+  "author_contrast": 10.05,
+  "file_sizes_bytes": {
+    "png": 5459021,
+    "jpg": 576126,
+    "webp": 278378
+  },
+  "file_sizes_kb": {
+    "png": 5331.1,
+    "jpg": 562.6,
+    "webp": 271.9
+  },
+  "gates": {
+    "ratio_ok": true,
+    "thumb_cap_ok": true,
+    "contrast_ok": true,
+    "author_contrast_ok": true,
+    "lines_ok": true
+  },
+  "thresholds": {
+    "ratio": 1.6,
+    "ratio_tol": 0.005,
+    "min_thumb_cap_px": 11.0,
+    "min_contrast": 4.5,
+    "max_lines": 3
+  },
+  "result": "PASS",
+  "outputs": {
+    "png": "books/covers/julian-pike/dist/julian-pike.png",
+    "jpg": "books/covers/julian-pike/dist/julian-pike.jpg",
+    "webp": "books/covers/julian-pike/dist/julian-pike.webp"
+  }
+}

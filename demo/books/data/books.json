@@ -1,0 +1,64 @@
+{
+  "_provenance": "Per-book site copy extracted from each book's BOOKHUB dossier by Slice 1 subagents (one per book), supervised against the plan's QC gates: blurb <= 50 words, hook-not-synopsis, spoiler-safe to the inciting incident, voice-matched to the dossier's style directives, no invented proper nouns. Author is the demo pen name 'A. May Zing'. Imprint/price are placeholders (no imprint or price in any dossier).",
+  "site": {
+    "name": "BookHub",
+    "tagline": "Three books by A. May Zing. Hover, tap, or focus a cover to flip it.",
+    "imprint": "Parchment Press"
+  },
+  "books": [
+    {
+      "slug": "the-last-word",
+      "title": "The Last Word",
+      "author": "A. May Zing",
+      "kicker": "A Dystopian Thriller",
+      "blurb": "History is a death sentence. Scavenging the Scraplands, junker Signe Salazar pulls a forbidden book from the wreckage, a relic the Republic of Ash executes people for owning. Now the Scribes are hunting her, and a hand-drawn map points to one man who deals in heresy: a blacksmith named Orson Shepherd.",
+      "meta": "A. May Zing · Parchment Press · 2026",
+      "cta": { "label": "Buy · $12.99", "href": "#buy" },
+      "mode": "info",
+      "cover": {
+        "webp": "assets/the-last-word.webp",
+        "jpg": "assets/the-last-word.jpg",
+        "width": 1600,
+        "height": 2560,
+        "alt": "The Last Word by A. May Zing — a ruined city under an amber sky, a single glowing book in the foreground"
+      },
+      "provenance": "dossier: Plans/Story_Dossier_Worksheet.txt (plot_beats hook + inciting incident; character_dossier; world_building); voice per core_prose_style_directives."
+    },
+    {
+      "slug": "the-signal",
+      "title": "The Signal",
+      "author": "A. May Zing",
+      "kicker": "A YA Digital Thriller",
+      "blurb": "Casey Morales films the truth from behind her camera, giving a voice to the unseen in Meridian Bay. Then influencer Avery Liang steals her documentary footage and posts it as her own. It goes viral for all the wrong reasons, and the cruelty turns toward Casey's anxious best friend, Maya.",
+      "meta": "A. May Zing · Parchment Press · 2026",
+      "cta": { "label": "Buy · $14.99", "href": "#buy" },
+      "mode": "info",
+      "cover": {
+        "webp": "assets/the-signal.webp",
+        "jpg": "assets/the-signal.jpg",
+        "width": 1600,
+        "height": 2560,
+        "alt": "The Signal by A. May Zing — a figure at night before a wall of glowing monitors, a coastal city beyond"
+      },
+      "provenance": "dossier: Dossier/Story_Dossier_Worksheet.md (beats 1-3; character_roster; world_building); voice per baseline_prose_style. NOTE: dossier genre is YA digital/social-media thriller, not the surveillance-techno framing in the plan — copy follows the dossier."
+    },
+    {
+      "slug": "julian-pike",
+      "title": "The Tasteful Kidnapping of Julian Pike",
+      "author": "A. May Zing",
+      "kicker": "A Deadpan Caper",
+      "blurb": "Julian Pike turns forty-two efficiently, politely, and gets into the wrong black car. The three organized strangers inside are certain he's the discreet fixer who launders a dead senator's buried secrets. He is not. He also, being conflict-averse, does not immediately correct them. A tasteful mistake, escalating.",
+      "meta": "A. May Zing · Parchment Press · 2026",
+      "cta": { "label": "Buy · $14.99", "href": "#buy" },
+      "mode": "info",
+      "cover": {
+        "webp": "assets/julian-pike.webp",
+        "jpg": "assets/julian-pike.jpg",
+        "width": 1600,
+        "height": 2560,
+        "alt": "The Tasteful Kidnapping of Julian Pike by A. May Zing — a cream collage with a vintage black limousine, photographs, and a romance silhouette"
+      },
+      "provenance": "dossier: story-dossier-markdown-format/section-10 (opening), section-2 (concept/hook), section-9 (genre lens), section-8 (voice: wry deadpan)."
+    }
+  ]
+}
