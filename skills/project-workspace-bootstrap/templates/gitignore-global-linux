@@ -1,0 +1,6 @@
+# Linux system files (global — applies to all repos on this machine)
+*~
+.directory
+.Trash-*
+.nfs*
+.fuse_hidden*

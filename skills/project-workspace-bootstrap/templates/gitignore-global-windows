@@ -1,0 +1,9 @@
+# Windows system files (global — applies to all repos on this machine)
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+*.stackdump
