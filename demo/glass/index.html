@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aurora Glass — frosted cards over a gradient (built from exported tokens)</title>
+
+  <!-- THE TRANSFER PROOF: every design value below comes from this file,
+       generated from DESIGN.md by scripts/export.py. The backdrop is the SAME
+       gradients.hero token the gradient demo uses (module composition). -->
+  <link rel="stylesheet" href="dist/tokens.css">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ---- page chrome: structural mechanics, not design values ---- */
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: var(--space-xl);
+      font: var(--type-body-lg);
+      color: var(--color-on-surface);
+      /* backdrop = the gradients.hero token, composed from Module A */
+      background: var(--gradient-hero) fixed;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Sharp, token-colored orbs sit BEHIND the glass so the backdrop blur is
+       visible where the card overlaps them. Colors are tokens; placement is
+       structural. */
+    .orb { position: fixed; border-radius: var(--rounded-full); z-index: 0; filter: none; }
+    .orb--a { width: 220px; height: 220px; background: var(--color-secondary); top: 22%; left: 18%; }
+    .orb--b { width: 160px; height: 160px; background: var(--color-on-primary); top: 48%; left: 46%; }
+    .orb--c { width: 200px; height: 200px; background: var(--color-primary-strong); top: 30%; right: 16%; }
+
+    .stack { position: relative; z-index: 1; width: min(440px, 92vw); }
+
+    /* ---- glass card: VALUES come entirely from tokens.css ---- */
+    .glass-card {
+      position: relative;
+      background: var(--glass-card-bg);                 /* translucent fill */
+      -webkit-backdrop-filter: var(--glass-card-backdrop);  /* blur(20px), Safari */
+      backdrop-filter: var(--glass-card-backdrop);          /* blur(20px) */
+      border: 1px solid var(--glass-card-border);       /* hairline */
+      box-shadow: var(--glass-card-shadow);             /* soft drop shadow */
+      color: var(--glass-card-fg);
+      border-radius: var(--glass-card-radius);
+      padding: var(--glass-card-pad);
+    }
+    .glass-badge {
+      display: inline-block;
+      background: var(--glass-badge-bg);
+      -webkit-backdrop-filter: var(--glass-badge-backdrop);  /* blur(40px) */
+      backdrop-filter: var(--glass-badge-backdrop);
+      border: 1px solid var(--glass-badge-border);
+      color: var(--glass-badge-fg);
+      border-radius: var(--glass-badge-radius);
+      padding: var(--glass-badge-pad) calc(var(--glass-badge-pad) * 2);
+      font: var(--type-label-caps);
+      letter-spacing: var(--type-label-caps-tracking, 0.12em);
+      text-transform: uppercase;
+      margin-bottom: var(--space-md);
+    }
+    .glass-card__title {
+      color: var(--glass-card-title-fg);
+      font: var(--glass-card-title-font);
+      margin: 0 0 var(--space-sm);
+    }
+    .glass-card__body { margin: 0; opacity: 0.95; }
+    .glass-card__body code { font-size: 0.85em; }
+  </style>
+</head>
+<body>
+  <div class="orb orb--a" aria-hidden="true"></div>
+  <div class="orb orb--b" aria-hidden="true"></div>
+  <div class="orb orb--c" aria-hidden="true"></div>
+
+  <div class="stack">
+    <article class="glass-card">
+      <span class="glass-badge">Aurora Glass</span>
+      <h2 class="glass-card__title">Frosted glass, composed from tokens.</h2>
+      <p class="glass-card__body">
+        This card floats over <code>var(--gradient-hero)</code> — the same gradient
+        token the gradient demo paints. Its fill, blur, hairline border and shadow
+        all resolve from <code>dist/tokens.css</code>. The orbs behind it blur
+        through the glass because <code>backdrop-filter</code> uses
+        <code>var(--glass-card-backdrop)</code> = <code>blur(20px)</code>.
+      </p>
+    </article>
+  </div>
+</body>
+</html>

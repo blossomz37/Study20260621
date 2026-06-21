@@ -1,0 +1,57 @@
+:root {
+  --color-primary: #5b21b6;
+  --color-primary-strong: #4c1d95;
+  --color-on-primary: #f5f3ff;
+  --color-secondary: #2563eb;
+  --color-tertiary: #db2777;
+  --color-accent: #f59e0b;
+  --color-surface: #0b1020;
+  --color-on-surface: #eef0fb;
+  --color-on-surface-variant: #c7cbe0;
+  --color-glass-fill: rgba(255,255,255,0.10);
+  --color-glass-fill-strong: rgba(255,255,255,0.16);
+  --color-glass-border: rgba(255,255,255,0.22);
+  --color-glass-shadow: rgba(8,10,25,0.45);
+  --type-display-lg: 700 44px/1.08 Sora;
+  --type-display-lg-tracking: -0.02em;
+  --type-title-md: 600 22px/1.2 Sora;
+  --type-body-lg: 400 17px/1.6 Inter;
+  --type-label-caps: 600 12px/1.2 Inter;
+  --type-label-caps-tracking: 0.12em;
+  --rounded-md: 12px;
+  --rounded-lg: 20px;
+  --rounded-full: 9999px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 64px;
+  --gradient-hero: linear-gradient(135deg, var(--color-primary) 0%, var(--color-tertiary) 55%, var(--color-accent) 100%);
+  --blur-glass: 20px;
+  --blur-glass-strong: 40px;
+  --shadow-glass: 0 8px 32px 0 var(--color-glass-shadow);
+
+  /* components (resolved from token refs) */
+  --glass-card-bg: var(--color-glass-fill);
+  --glass-card-backdrop: blur(var(--blur-glass));
+  --glass-card-border: var(--color-glass-border);
+  --glass-card-shadow: var(--shadow-glass);
+  --glass-card-fg: var(--color-on-surface);
+  --glass-card-radius: var(--rounded-lg);
+  --glass-card-pad: var(--space-lg);
+  --glass-card-backdrop-image: var(--gradient-hero);
+  --glass-card-title-fg: var(--color-on-surface);
+  --glass-card-title-font: var(--type-title-md);
+  --glass-badge-bg: var(--color-glass-fill-strong);
+  --glass-badge-backdrop: blur(var(--blur-glass-strong));
+  --glass-badge-border: var(--color-glass-border);
+  --glass-badge-fg: var(--color-on-surface);
+  --glass-badge-radius: var(--rounded-full);
+  --glass-badge-pad: var(--space-sm);
+  --glass-badge-backdrop-image: var(--gradient-hero);
+}
+
+/* honor the motion token contract: reduced motion collapses duration */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+  }
+}

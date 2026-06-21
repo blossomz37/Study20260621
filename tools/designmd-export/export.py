@@ -14,6 +14,10 @@ Implements two proposed extensions:
   - `gradients` -> a `--gradient-*` CSS var (built into a CSS gradient string),
                   Tailwind `backgroundImage`, and a DTCG `gradient` composite
                   (stops in `$value`, orientation in `$extensions.designmd`).
+  - glass       -> `--blur-*` and `--shadow-*` CSS vars; component `--*-backdrop`
+                  (a `blur(...)` value) and `--*-shadow`; Tailwind `backdropBlur` +
+                  `boxShadow`; DTCG native `shadow` composite and a custom `blur`
+                  group ($extensions-documented, since DTCG has no blur type).
 
 Usage:  python3 export.py demo/book-flip/DESIGN.md --out demo/book-flip/dist
 """
@@ -42,7 +46,8 @@ PROP_SUFFIX = {
     "backgroundColor": "bg", "textColor": "fg", "typography": "font",
     "rounded": "radius", "padding": "pad", "perspective": "perspective",
     "transition": "transition", "size": "size", "height": "height", "width": "width",
-    "backgroundImage": "bg-image",
+    "backgroundImage": "bg-image", "backdropBlur": "backdrop", "borderColor": "border",
+    "shadow": "shadow", "backdrop": "backdrop-image",
 }
 
 
@@ -63,9 +68,35 @@ def ref_to_var(v):
     path = REF_RE.match(v.strip()).group(1)
     group, _, name = path.partition(".")
     prefix = {"colors": "color", "typography": "type", "rounded": "rounded",
-              "spacing": "space", "motion": "motion",
-              "gradients": "gradient"}.get(group, group)
+              "spacing": "space", "motion": "motion", "gradients": "gradient",
+              "blur": "blur", "shadow": "shadow"}.get(group, group)
     return f"var(--{prefix}-{name})"
+
+
+def shadow_dim(v):
+    """Shadow offset/blur/spread -> CSS length. Bare 0 stays '0'; bare N -> 'Npx'."""
+    s = str(v).strip()
+    if s in ("0", "0px", "0rem", "0em"):
+        return "0"
+    if re.match(r"^-?\d+(\.\d+)?$", s):
+        return s + "px"
+    return s
+
+
+def _dtcg_dim(v):
+    """DTCG dimension string: a bare number gets 'px'; '0' becomes '0px'."""
+    s = str(v).strip()
+    if re.match(r"^-?\d+(\.\d+)?$", s):
+        return s + "px"
+    return s
+
+
+def shadow_css(sh):
+    """A shadow token map -> a CSS box-shadow string. Color ref -> var()."""
+    color = sh.get("color", "#000")
+    col = ref_to_var(color) if is_ref(color) else color
+    return (f"{shadow_dim(sh.get('offsetX', 0))} {shadow_dim(sh.get('offsetY', 0))} "
+            f"{shadow_dim(sh.get('blur', 0))} {shadow_dim(sh.get('spread', 0))} {col}")
 
 
 def css_position(pos):
@@ -131,6 +162,10 @@ def export_css(fm):
         L.append(f"  --motion-{name}: {prop} {m.get('duration','0ms')} {m.get('easing','ease')};")
     for name, g in (fm.get("gradients") or {}).items():
         L.append(f"  --gradient-{name}: {gradient_css(g)};")
+    for name, val in (fm.get("blur") or {}).items():
+        L.append(f"  --blur-{name}: {val};")
+    for name, sh in (fm.get("shadow") or {}).items():
+        L.append(f"  --shadow-{name}: {shadow_css(sh)};")
     L.append("")
     L.append("  /* components (resolved from token refs) */")
     for cname, comp in (fm.get("components") or {}).items():
@@ -138,7 +173,15 @@ def export_css(fm):
             continue
         for prop, val in comp.items():
             suffix = PROP_SUFFIX.get(prop, prop.lower())
-            css = ref_to_var(val) if is_ref(val) else val
+            if prop == "backdropBlur":
+                # wrap the blur dimension in blur(); apply to backdrop-filter AND
+                # -webkit-backdrop-filter at the call site (Safari).
+                dim = ref_to_var(val) if is_ref(val) else val
+                css = f"blur({dim})"
+            elif prop == "shadow":
+                css = ref_to_var(val) if is_ref(val) else shadow_css(val)
+            else:
+                css = ref_to_var(val) if is_ref(val) else val
             L.append(f"  --{cname}-{suffix}: {css};")
     L.append("}")
     L.append("")
@@ -176,12 +219,15 @@ def export_tailwind(fm):
     tf = {n: m.get("easing", "ease") for n, m in motion.items()}
     tp = {n: m["property"] for n, m in motion.items() if m.get("property")}
     bgimg = {n: gradient_css(g) for n, g in (fm.get("gradients") or {}).items()}
+    backdrop_blur = {n: str(v) for n, v in (fm.get("blur") or {}).items()}
+    box_shadow = {n: shadow_css(sh) for n, sh in (fm.get("shadow") or {}).items()}
 
     theme = {
         "colors": colors, "borderRadius": rounded, "spacing": spacing,
         "fontFamily": families, "fontSize": fontsize,
         "transitionDuration": dur, "transitionTimingFunction": tf,
         "transitionProperty": tp, "backgroundImage": bgimg,
+        "backdropBlur": backdrop_blur, "boxShadow": box_shadow,
     }
     body = json.dumps({"theme": {"extend": theme}}, indent=2)
     return ("// Generated from DESIGN.md by tools/designmd-export — do not edit by hand.\n"
@@ -243,6 +289,31 @@ def export_dtcg(fm):
                 "$type": "gradient",
                 "$value": stops,
                 "$extensions": {"designmd": ext},
+            }
+    if fm.get("shadow"):
+        # DTCG has a native `shadow` composite: {color, offsetX, offsetY, blur, spread}.
+        out["shadow"] = {}
+        for n, sh in fm["shadow"].items():
+            out["shadow"][n] = {"$type": "shadow", "$value": {
+                "color": sh.get("color"),
+                "offsetX": _dtcg_dim(sh.get("offsetX", 0)),
+                "offsetY": _dtcg_dim(sh.get("offsetY", 0)),
+                "blur": _dtcg_dim(sh.get("blur", 0)),
+                "spread": _dtcg_dim(sh.get("spread", 0)),
+            }}
+    if fm.get("blur"):
+        # INVENTION POINT: DTCG has no backdrop-filter / blur type. We carry blur as
+        # a minimal dimension group and flag the absence in $extensions so a
+        # standard consumer is told this is a non-standard local extension.
+        out["blur"] = {
+            "$description": ("Non-standard local extension: DTCG defines no "
+                             "backdrop-filter/blur type. Values are dimensions "
+                             "consumed as `backdrop-filter: blur(<value>)`."),
+        }
+        for n, v in fm["blur"].items():
+            out["blur"][n] = {
+                "$type": "dimension", "$value": str(v),
+                "$extensions": {"designmd": {"role": "backdrop-blur"}},
             }
     if fm.get("components"):
         out["components"] = {}

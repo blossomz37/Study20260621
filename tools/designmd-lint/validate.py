@@ -10,26 +10,31 @@ spec-config.js, parser/spec.js), so it cannot run as-is. This script
 re-implements the *logic* of those rules in dependency-light Python (stdlib +
 PyYAML) so DESIGN.md validation is reproducible.
 
-It ALSO implements two proposed token extensions: `motion`
-(references/motion-extension.md) and `gradients` (references/gradient.md). Each
-adds a typed token group plus matching rules. Running this validator green on a
-demo DESIGN.md that uses the extension is the step-3 proof that the extension
-closes the gap the un-extended reference linter exposed.
+It ALSO implements three proposed token extensions: `motion`
+(references/motion-extension.md), `gradients` (references/gradient.md), and glass
+(`blur` + `shadow`, references/glass.md). Each adds a typed token group plus
+matching rules. Running this validator green on a demo DESIGN.md that uses the
+extension is the step-3 proof that the extension closes the gap the un-extended
+reference linter exposed.
 
-Rules implemented (mirroring reference/rules + the motion/gradient extensions):
+Rules implemented (mirroring reference/rules + the motion/gradient/glass extensions):
   section-order       warning   canonical section order (alias-aware)
   missing-sections    info      spacing/rounded absent while colors present
   missing-primary     error     colors.primary must be defined
   missing-typography  warning   at least one typography token
   broken-ref          error     {a.b} references must resolve; unknown sub-tokens warn
-  contrast-ratio      warning   component bg/text pairs >= WCAG AA 4.5:1
-                      info      text over a gradient backgroundImage (not evaluable)
+  contrast-ratio      warning   opaque component bg/text pairs >= WCAG AA 4.5:1
+                      info      gradient/translucent/blurred surface (C5: advisory,
+                                checked vs the declared backdrop's darkest stop)
   unknown-key         warning   top-level key looks like a typo of a schema key
   motion-format       error     motion.*.duration/delay valid time; easing valid
   motion-orphaned     info      motion tokens referenced by nothing
   gradient-stops      error     gradient needs >=2 stops; positions valid (0-100%/0-1)
   gradient-type       warning   gradient type in {linear, radial, conic}
   gradient-broken-ref error     each stop color {ref} must resolve
+  blur-format         error     blur.* must be valid dimensions (e.g. 20px)
+  shadow-format       error     shadow.* offsets/blur/spread valid dims; color present
+  shadow-broken-ref   error     shadow color {ref} must resolve
 
 Exit code: 1 if any ERROR finding, else 0. Warnings/info never fail the build.
 
@@ -59,17 +64,23 @@ SECTION_ALIASES = {
     "dos and donts": "Do's and Don'ts",
     "do's and don'ts": "Do's and Don'ts",
 }
-# Base schema keys + the proposed `motion` / `gradients` extension keys.
+# Base schema keys + the proposed `motion` / `gradients` / glass (`blur`,
+# `shadow`) extension keys.
 SCHEMA_KEYS = ["version", "name", "description", "colors", "typography",
-               "rounded", "spacing", "components", "motion", "gradients"]
-# Base component sub-tokens + the proposed `perspective`/`transition` props and
-# the `gradients` extension's `backgroundImage` prop.
+               "rounded", "spacing", "components", "motion", "gradients",
+               "blur", "shadow"]
+# Base component sub-tokens + the `perspective`/`transition` (motion) props, the
+# `backgroundImage` (gradients) prop, and the glass props `backdropBlur`,
+# `borderColor`, `shadow`, and the `backdrop` contrast contract.
 VALID_COMPONENT_SUB_TOKENS = ["backgroundColor", "textColor", "typography",
                               "rounded", "padding", "size", "height", "width",
-                              "perspective", "transition", "backgroundImage"]
+                              "perspective", "transition", "backgroundImage",
+                              "backdropBlur", "borderColor", "shadow", "backdrop"]
 TOKEN_GROUPS = ["colors", "typography", "rounded", "spacing", "motion",
-                "gradients", "components"]
+                "gradients", "blur", "shadow", "components"]
 GRADIENT_TYPES = {"linear", "radial", "conic"}
+DIMENSION_RE = re.compile(r"^\d+(\.\d+)?(px|rem|em)$")
+SHADOW_DIM_RE = re.compile(r"^-?\d+(\.\d+)?(px|rem|em)$")  # allows negative offsets
 WCAG_AA = 4.5
 EASING_KEYWORDS = {"linear", "ease", "ease-in", "ease-out", "ease-in-out",
                    "step-start", "step-end"}
@@ -186,6 +197,57 @@ def valid_position(p):
         return False
 
 
+def valid_shadow_dim(v):
+    """Shadow offsets/blur/spread: a dimension, or a bare/explicit zero."""
+    s = str(v).strip()
+    if s in ("0", "0px", "0rem", "0em"):
+        return True
+    return bool(SHADOW_DIM_RE.match(s))
+
+
+# --- glass / translucency helpers --------------------------------------------
+
+def alpha_of(s):
+    """Return the alpha channel of a color string (1.0 if opaque or unknown)."""
+    if not isinstance(s, str):
+        return 1.0
+    s = s.strip()
+    m = re.match(r"^rgba?\(([^)]+)\)$", s)
+    if m:
+        parts = [p.strip() for p in m.group(1).replace("/", ",").split(",")]
+        if len(parts) >= 4:
+            try:
+                return float(parts[3])
+            except ValueError:
+                return 1.0
+        return 1.0
+    m = re.match(r"^#([0-9a-fA-F]{4}|[0-9a-fA-F]{8})$", s)
+    if m:
+        h = m.group(1)
+        if len(h) == 4:
+            h = "".join(c * 2 for c in h)
+        return int(h[6:8], 16) / 255.0
+    return 1.0
+
+
+def darkest_stop_color(fm, gradient_path):
+    """Resolve a gradient token to the RGB of its darkest (lowest-luminance) stop."""
+    node, ok = lookup(fm, gradient_path)
+    if not ok or not isinstance(node, dict):
+        return None
+    darkest, best = None, 2.0
+    for st in (node.get("stops") or []):
+        if not isinstance(st, dict):
+            continue
+        cv, _ = resolve_value(st.get("color"), fm)
+        c = parse_color(cv)
+        if c is not None:
+            lum = luminance(c)
+            if lum < best:
+                best, darkest = lum, c
+    return darkest
+
+
 # --- levenshtein (for unknown-key) -------------------------------------------
 
 def levenshtein(a, b):
@@ -257,14 +319,49 @@ def rule_contrast(fm, sections, F):
     for cname, comp in comps.items():
         if not isinstance(comp, dict):
             continue
-        bg, tx = comp.get("backgroundColor"), comp.get("textColor")
+        tx = comp.get("textColor")
+        bg = comp.get("backgroundImage")
+        # Advisory: text over a gradient backgroundImage can't be checked against a
+        # single color — note it, don't fail (mirrors the glass C5 pattern).
+        if bg and tx and comp.get("backgroundColor") is None:
+            F("info", "contrast-ratio", f"components.{cname}",
+              "textColor sits over a gradient backgroundImage; contrast is not "
+              "evaluable against a single color — verify legibility against the "
+              "gradient's darkest stop.")
+            continue
+        bg = comp.get("backgroundColor")
         if bg is None or tx is None:
             continue
         bgv, ok1 = resolve_value(bg, fm)
         txv, ok2 = resolve_value(tx, fm)
         if not (ok1 and ok2):
             continue
-        bgc, txc = parse_color(bgv), parse_color(txv)
+        # C5 fix: a translucent (alpha < 1) or backdrop-blurred surface is glass —
+        # its WCAG contrast against the resolved fill is meaningless (it ignores the
+        # backdrop). Don't emit a failing warning; downgrade to an advisory and,
+        # when the component declares its backdrop, check text vs the backdrop's
+        # darkest stop instead.
+        is_glass = comp.get("backdropBlur") is not None or alpha_of(bgv) < 1.0
+        txc = parse_color(txv)
+        if is_glass:
+            backdrop = comp.get("backdrop")
+            if backdrop is not None and is_ref(backdrop) and txc is not None:
+                dark = darkest_stop_color(fm, ref_path(backdrop))
+                if dark is not None:
+                    r = contrast(dark, txc)
+                    verdict = "meets" if r >= WCAG_AA else "is below"
+                    F("info", "contrast-ratio", f"components.{cname}",
+                      f"translucent/blurred surface over backdrop {backdrop}: "
+                      f"textColor vs the backdrop's darkest stop is {r:.2f}:1 "
+                      f"({verdict} WCAG AA {WCAG_AA}:1; advisory — blur and "
+                      f"translucency shift effective contrast).")
+                    continue
+            F("info", "contrast-ratio", f"components.{cname}",
+              "translucent/blurred surface: contrast is not evaluable against the "
+              "fill alone — declare a `backdrop` token or verify against the actual "
+              "backdrop.")
+            continue
+        bgc = parse_color(bgv)
         if not bgc or not txc:
             continue
         r = contrast(bgc, txc)
@@ -272,17 +369,6 @@ def rule_contrast(fm, sections, F):
             F("warning", "contrast-ratio", f"components.{cname}",
               f"textColor on backgroundColor has contrast {r:.2f}:1, "
               f"below WCAG AA minimum {WCAG_AA}:1.")
-    # Advisory: text over a gradient background cannot be contrast-checked
-    # against a single color. Don't fail — note it (mirrors the glass C5 pattern).
-    for cname, comp in comps.items():
-        if not isinstance(comp, dict):
-            continue
-        if comp.get("backgroundImage") and comp.get("textColor") \
-                and comp.get("backgroundColor") is None:
-            F("info", "contrast-ratio", f"components.{cname}",
-              "textColor sits over a gradient backgroundImage; contrast is not "
-              "evaluable against a single color — verify legibility against the "
-              "gradient's darkest stop.")
 
 
 def rule_unknown_key(fm, sections, F):
@@ -377,10 +463,41 @@ def rule_gradient(fm, sections, F):
                       f"defined token.")
 
 
+def rule_blur(fm, sections, F):
+    blur = fm.get("blur") or {}
+    for name, val in blur.items():
+        if not DIMENSION_RE.match(str(val)):
+            F("error", "blur-format", f"blur.{name}",
+              f"'{val}' is not a valid blur dimension (expected e.g. 20px).")
+
+
+def rule_shadow(fm, sections, F):
+    shadow = fm.get("shadow") or {}
+    for name, sh in shadow.items():
+        if not isinstance(sh, dict):
+            F("error", "shadow-format", f"shadow.{name}",
+              "Shadow token must be a map (offsetX/offsetY/blur/spread/color).")
+            continue
+        for field in ("offsetX", "offsetY", "blur", "spread"):
+            if field in sh and not valid_shadow_dim(sh[field]):
+                F("error", "shadow-format", f"shadow.{name}.{field}",
+                  f"'{sh[field]}' is not a valid dimension (expected e.g. 8px, 0).")
+        color = sh.get("color")
+        if color is None:
+            F("error", "shadow-format", f"shadow.{name}",
+              "Shadow token is missing required 'color'.")
+        elif is_ref(color):
+            _, ok = lookup(fm, ref_path(color))
+            if not ok:
+                F("error", "shadow-broken-ref", f"shadow.{name}",
+                  f"Reference {{{ref_path(color)}}} does not resolve to any "
+                  f"defined token.")
+
+
 RULES = [rule_section_order, rule_missing_sections, rule_missing_primary,
          rule_missing_typography, rule_broken_ref, rule_contrast,
          rule_unknown_key, rule_motion_format, rule_motion_orphaned,
-         rule_gradient]
+         rule_gradient, rule_blur, rule_shadow]
 
 
 # --- driver ------------------------------------------------------------------
