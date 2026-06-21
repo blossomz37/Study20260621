@@ -92,3 +92,23 @@ alone.
 Full sweep via `tools/`: book-flip / gradient / glass all PASS; both `.broken.md`
 gap files FAIL as designed. `tools/` exporter output is byte-identical to the
 committed `dist/`.
+
+## 6. QA follow-up — white-on-white in the demo (fixed)
+
+A review caught a legibility bug in `index.html` (not the tooling): the decorative
+`orb--b` was filled with `var(--color-on-primary)` (#f5f3ff, near-white) and sat
+directly behind the card's near-white body text — frosted through the 10%-white
+fill it produced a ~1:1 white-on-white band. This violated the DESIGN.md's own
+"keep glass text on the darker end of the backdrop" rule. Note the linter was
+*correct*: its C5 advisory checks the declared `backdrop: {gradients.hero}` token's
+darkest stop (7.91:1) and cannot see a decorative non-token orb composited behind
+the glass (the limitation flagged in `references/glass.md` open Q #3).
+
+Fixes (both `index.html`-only — no token change, no re-export):
+- **Recolor** `orb--b` from `--color-on-primary` to `--color-tertiary` (#db2777,
+  saturated pink) so the frosted patch behind the text stays mid-dark.
+- **Legibility scrim:** `text-shadow: 0 1px 3px rgba(8,10,25,0.55)` on the card
+  text — the treatment the DESIGN.md and upstream atmospheric-glass both prescribe.
+
+Verified on :8767: body text legible across the full card; `orb--b` computes to
+`rgb(219,39,119)`; no console errors. Lint/exports unchanged (demo-only edit).

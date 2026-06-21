@@ -35,7 +35,7 @@
        structural. */
     .orb { position: fixed; border-radius: var(--rounded-full); z-index: 0; filter: none; }
     .orb--a { width: 220px; height: 220px; background: var(--color-secondary); top: 22%; left: 18%; }
-    .orb--b { width: 160px; height: 160px; background: var(--color-on-primary); top: 48%; left: 46%; }
+    .orb--b { width: 160px; height: 160px; background: var(--color-tertiary); top: 48%; left: 46%; }
     .orb--c { width: 200px; height: 200px; background: var(--color-primary-strong); top: 30%; right: 16%; }
 
     .stack { position: relative; z-index: 1; width: min(440px, 92vw); }
@@ -51,6 +51,10 @@
       color: var(--glass-card-fg);
       border-radius: var(--glass-card-radius);
       padding: var(--glass-card-pad);
+      /* legibility scrim: the DESIGN.md (and upstream atmospheric-glass) prescribe
+         a subtle text-shadow so light text holds up over unpredictable backdrops.
+         Structural mechanic, not a token — there is no text-shadow token type. */
+      text-shadow: 0 1px 3px rgba(8, 10, 25, 0.55);
     }
     .glass-badge {
       display: inline-block;
