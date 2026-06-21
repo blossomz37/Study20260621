@@ -73,3 +73,8 @@ Thumbs.db
 
 # Reference-only downloads dropped into scratch (cherry-pick locally; don't push)
 workspace/scratch/**/*.zip
+
+# Demo exports are generated, but they ARE the demo's transfer-proof artifact.
+# Re-include them despite the generic `dist/` rule above.
+!demo/**/dist/
+!demo/**/dist/**

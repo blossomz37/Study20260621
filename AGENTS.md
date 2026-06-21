@@ -4,7 +4,8 @@
 - **Status**: Active (early/nascent)
 - **Purpose**: DESIGN.md reverse-engineering study/demo — reverse-engineer a live website's visual identity into a structured `DESIGN.md` (the Google Labs/Stitch format: YAML design tokens + markdown rationale), validate it with the official linter, export to Tailwind/DTCG, then recreate a mini-UI to prove the recovered design system transfers. Educational/demo framing.
 - **Git**: GitHub remote at `origin` → https://github.com/blossomz37/Study20260621.git; work on `main`.
-- **Current work**: `workspace/scratch/2026-06-21-01-idea-design.md-reverse-engineering/` — research notes plus cherry-picked upstream reference material under `reference/` (spec, lint rules, worked examples). See `reference/SOURCE.md` for provenance (Apache-2.0, attributed).
+- **First pipeline proof (complete)**: the rgdbrandingawards.com cover-flip effect was reverse-engineered end-to-end — spec → `DESIGN.md` → lint → export → recreate-from-exports. Reusable tooling lives in `tools/` (linter + exporter); the worked demo and its generated exports in `demo/book-flip/`; a proposed `motion` format extension in `docs/design-md-motion-extension-proposal.md`. The whole workflow is captured as the external `designmd-reverse-engineer` skill (Carlo's global skills home; packaged copy in `.manual-distributed/`). Summary: `workspace/handoffs/20260621-04-book-flip-pipeline-status.md`.
+- **Upstream reference material**: `workspace/scratch/2026-06-21-01-idea-design.md-reverse-engineering/reference/` — cherry-picked spec, lint rules, worked examples. See `reference/SOURCE.md` for provenance (Apache-2.0, attributed).
 
 ## Workspace Structure
 
@@ -21,6 +22,21 @@ Ephemeral work and handoffs. Subfolders:
 - **evidence/** — Screenshots, test output, diffs, logs. Name by task ID for traceability. Link from handoffs.
 - **archive/** — Zipped completed task documentation. Zip structure: `TASK-ID_YYYY-MM-DD.zip` containing relevant plans/handoffs/evidence.
 - **scratch/** — Ephemeral notes, brainstorms, half-formed ideas. Not permanent; see hygiene below. **Reference-material convention:** downloaded repo zips are cherry-pick sources only — they are git-ignored (`scratch/**/*.zip`) and stay local. Extract just the needed files into a `reference/` subfolder (tracked) and record provenance in `reference/SOURCE.md`.
+
+### tools/
+Reusable, dependency-light project tooling (stdlib + PyYAML; not ephemeral).
+`designmd-lint/` validates a `DESIGN.md`; `designmd-export/` exports it to CSS
+custom properties, a Tailwind config, and DTCG `tokens.json`. Both are also
+bundled into the `designmd-reverse-engineer` skill.
+
+### demo/
+Worked demonstrations that double as transfer proofs. `book-flip/` holds a
+`DESIGN.md`, its generated `dist/` exports, and an `index.html` that recreates
+the cover-flip effect consuming only those exports.
+
+> **Tracking note:** the global `.gitignore` has a generic `dist/` rule (Python
+> build cruft). `demo/**/dist/` is force-tracked via a negation because those
+> exports are part of the demo, not build artifacts.
 
 ## Filenaming Convention
 
