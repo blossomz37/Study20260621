@@ -273,7 +273,7 @@ The three current faces (all in-library, all OFL):
 |---|---|---|---|---|
 | The Last Word | post-apoc dystopian thriller | **Anton** | Oswald 500 | UPPERCASE, tight, ice-white + scrim |
 | The Signal | YA digital / surveillance thriller | **League Spartan** 800 | Montserrat 500 | UPPERCASE, tracked, near-white + scrim |
-| Julian Pike | elegant vintage caper | **Bodoni Moda** (opsz→display) | Marcellus | Title Case, dark ink on cream, no scrim |
+| Julian Pike | elegant vintage caper | **Bodoni Moda** (opsz→display) | Marcellus | Title Case, dark ink on cream, no title scrim (cream byline footer) |
 
 ## Layout & Spacing
 

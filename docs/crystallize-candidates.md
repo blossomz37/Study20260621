@@ -81,14 +81,17 @@ Pipeline proven end-to-end (book-cover flip), so several candidates have graduat
   skills home; packaged in `.manual-distributed/`).
 - **C2 + C3** → folded into that skill's "Extending to a new effect family"
   protocol (mirror DTCG, scope narrowly, prove the gap with a failing lint).
+- **C5** → **resolved**: the glass module added a `backdrop` token and the C5
+  contrast fix (translucent/blurred surfaces → advisory checked against the
+  backdrop's worst-case stop). The "candidate spec improvement" is now shipped in
+  `tools/designmd-lint` + the skill's `references/glass.md`.
+- **C2 (next gaps)** → **gradient, shadow, and glass** token groups were all built
+  and proven (gap→lint→export→recreate); the cover-typography work then reused them
+  (scrim-as-glass). The remaining obvious gap is **scroll-driven** animation.
 - **C6** → captured as step 1 of the skill workflow ("extract ground truth").
 
 Still open as reference notes / future work:
 
 - **C4** (re-implement partial tooling, validate against the source's fixtures) —
   applied here; worth a standing rule.
-- **C5** (contrast false-positive on translucent/glass surfaces) — documented in
-  the skill + linter README; candidate spec improvement is contrast against a
-  declared backdrop token.
-- **C2 (next gaps)** — gradient / shadow / glass / scroll-driven token groups are
-  the obvious next extensions to exercise the protocol.
+- **C2 (scroll-driven)** — the one effect-family gap not yet exercised by the protocol.

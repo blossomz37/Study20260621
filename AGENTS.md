@@ -6,7 +6,10 @@
 - **Git**: GitHub remote at `origin` → https://github.com/blossomz37/Study20260621.git; work on `main`.
 - **First pipeline proof (complete)**: the rgdbrandingawards.com cover-flip effect was reverse-engineered end-to-end — spec → `DESIGN.md` → lint → export → recreate-from-exports. Reusable tooling lives in `tools/` (linter + exporter); the worked demo and its generated exports in `demo/book-flip/`; a proposed `motion` format extension in `docs/design-md-motion-extension-proposal.md`. The whole workflow is captured as the external `designmd-reverse-engineer` skill (Carlo's global skills home; packaged copy in `.manual-distributed/`). Summary: `workspace/handoffs/20260621-04-book-flip-pipeline-status.md`.
 - **Effect-family modules (complete)**: two further token groups were added to the skill via its "Extending to a new effect family" protocol — `gradients` (`demo/gradient/`, `references/gradient.md`) and glass = `blur` + native-DTCG `shadow` plus the C5 translucent-contrast fix (`demo/glass/`, `references/glass.md`). Each was proven gap→lint→export→recreate. Summary: `workspace/handoffs/20260621-05-glass-gradient-modules-complete.md`.
-- **BookHub site + cover-typography (complete)**: the flip/gradient/glass pieces composed into one real static site (`demo/books/site/`) presenting three real books by "A. May Zing" as a flip gallery, plus `demo/books/DESIGN.md` (evolves Shelf & Spine; adds a cover-typography concern — type roles + per-book override method + scrim-as-glass — with no new token type) and a new `tools/cover-typography/` Pillow compositor that bakes genre titling onto textless covers and gates them on Kindle-ratio + thumbnail legibility. Needs Pillow (in `.venv`). The cover tool is **repo-only, NOT a skill mirror** (unlike designmd-lint/export). Large cover PNG masters + OFL font binaries are git-ignored (regenerable / `fonts.json` is the record). Summary: `workspace/handoffs/20260621-06-bookhub-site-and-cover-typography-complete.md`.
+- **BookHub site + cover-typography (complete)**: the flip/gradient/glass pieces composed into one real static site (`demo/books/site/`) presenting three real books by "A. May Zing" as a flip gallery, plus `demo/books/DESIGN.md` (evolves Shelf & Spine; adds a cover-typography concern — type roles + per-book override method + scrim-as-glass — with no new token type) and a new `tools/cover-typography/` Pillow compositor that bakes genre titling onto textless covers and gates them on Kindle-ratio + thumbnail legibility. Title faces (from 2024–26 comps): Anton / League Spartan / Bodoni Moda. The author **byline sits at the foot of each cover** on its own gradient band (`author_zone` + `author_scrim` + optional `author_rule`). Needs Pillow (in `.venv`). The cover tool is **repo-only, NOT a skill mirror** (unlike designmd-lint/export). Large cover PNG masters + OFL font binaries are git-ignored (regenerable / `fonts.json` is the record). Summary: `workspace/handoffs/20260621-06-bookhub-site-and-cover-typography-complete.md`.
+- **Deployments (live)**: BookHub is deployed on two hosts, both auto-deploying on push to `main` via GitHub Actions (`.github/workflows/deploy-pages.yml`, `deploy-railway.yml`):
+  - **GitHub Pages** → https://blossomz37.github.io/Study20260621/ (publishes `demo/books/`; Source = GitHub Actions).
+  - **Railway** → https://bookhub-production-cd3a.up.railway.app (project `test-design-md`, service `bookhub`; a Caddy container from the repo-root `Dockerfile`/`Caddyfile`/`railway.json` serves `demo/books/` on `$PORT`; needs the `RAILWAY_TOKEN` **project** token GitHub secret). `demo/books/index.html` redirects `/`→`/site/`; `.railwayignore` slims `railway up` uploads. Summary: `workspace/handoffs/20260621-07-bookhub-byline-and-deployments.md`.
 - **`tools/` ↔ skill sync**: `tools/designmd-lint/validate.py` and `tools/designmd-export/export.py` are mirrors of the skill's bundled `scripts/`. When changing one, change both (the skill source is external at `~/.myagents/skills/designmd-reverse-engineer/`). Linter/exporter need `pyyaml` (installed in `.venv`).
 - **Upstream reference material**: `workspace/scratch/2026-06-21-01-idea-design.md-reverse-engineering/reference/` — cherry-picked spec, lint rules, worked examples. See `reference/SOURCE.md` for provenance (Apache-2.0, attributed).
 
@@ -29,17 +32,26 @@ Ephemeral work and handoffs. Subfolders:
 ### tools/
 Reusable, dependency-light project tooling (stdlib + PyYAML; not ephemeral).
 `designmd-lint/` validates a `DESIGN.md`; `designmd-export/` exports it to CSS
-custom properties, a Tailwind config, and DTCG `tokens.json`. Both are also
-bundled into the `designmd-reverse-engineer` skill.
+custom properties, a Tailwind config, and DTCG `tokens.json` (both bundled into the
+`designmd-reverse-engineer` skill). `cover-typography/` is a Pillow compositor
+(`compose.py`) that bakes genre titling onto covers and gates them on Kindle-ratio +
+thumbnail legibility — **repo-only, needs Pillow** (in `.venv`), not a skill mirror.
 
 ### demo/
-Worked demonstrations that double as transfer proofs. `book-flip/` holds a
-`DESIGN.md`, its generated `dist/` exports, and an `index.html` that recreates
-the cover-flip effect consuming only those exports.
+Worked demonstrations that double as transfer proofs. `book-flip/` recreates the
+cover-flip effect; `gradient/` and `glass/` demo the effect-family modules; `books/`
+is **BookHub** — the composed production site (`DESIGN.md` → `dist/` exports +
+per-book `covers/<slug>/cover-spec.yaml` → titled covers → `site/` gallery), deployed
+to GitHub Pages and Railway. Each holds a `DESIGN.md`, its generated `dist/` exports,
+and HTML that consumes only those exports.
 
 > **Tracking note:** the global `.gitignore` has a generic `dist/` rule (Python
-> build cruft). `demo/**/dist/` is force-tracked via a negation because those
-> exports are part of the demo, not build artifacts.
+> build cruft). `demo/**/dist/` is force-tracked via a negation because those exports
+> are part of the demo. **Exception:** the large cover **PNG masters**
+> (`demo/books/covers/*/dist/*.png`, 2.7–5.3MB) are re-ignored — they're
+> deterministically regenerable via `compose.py --all`; the web jpg/webp, QA contact
+> sheets, and `report.json` stay tracked. OFL font binaries
+> (`tools/cover-typography/fonts/`) are git-ignored too; `fonts.json` is the record.
 
 ## Filenaming Convention
 

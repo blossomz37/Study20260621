@@ -53,7 +53,8 @@ Needs Pillow + PyYAML (the repo `.venv` has them: `.venv/bin/python compose.py â
 3. Apply the legibility treatment: a **scrim** (linear gradient with an optional
    `hold` plateau so a bright zone stays darkened across the whole title band) and
    a text **stroke** + soft **glow**, sized off the fitted cap height.
-4. Composite title + author in the safe zone.
+4. Composite the title in its safe zone, and the **author byline in its own zone**
+   (the foot of the cover by default, via `author_zone` + a bottom `author_scrim`).
 5. Export **PNG, JPG (q82), WEBP (q80)**; record each file size.
 6. **QA** â€” downscale to a 160px-wide thumbnail; measure the rendered title
    cap-height and the **worst-case** text-zone contrast (brightest 95th-pct pixel
