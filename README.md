@@ -43,6 +43,4 @@ See [AGENTS.md](./AGENTS.md) for authoritative context and guidelines.
 - `CLAUDE.md` / `AGENTS.md` — project instructions and authoritative context
 - `.venv/` — Python virtual environment
 
-> The reusable workflow proven here is captured as the `designmd-reverse-engineer`
-> skill (in Carlo's global skills home; packaged copy in the git-ignored
-> `.manual-distributed/`).
+
