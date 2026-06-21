@@ -1,9 +1,10 @@
 # Project Agents & Workspace Context
 
 ## Project Status
-- **Status**: Pending (no remote repo yet)
-- **Purpose**: TBD (awaiting specification)
-- **Git**: Local init only; remote to be added
+- **Status**: Active (early/nascent)
+- **Purpose**: DESIGN.md reverse-engineering study/demo — reverse-engineer a live website's visual identity into a structured `DESIGN.md` (the Google Labs/Stitch format: YAML design tokens + markdown rationale), validate it with the official linter, export to Tailwind/DTCG, then recreate a mini-UI to prove the recovered design system transfers. Educational/demo framing.
+- **Git**: GitHub remote at `origin` → https://github.com/blossomz37/Study20260621.git; work on `main`.
+- **Current work**: `workspace/scratch/2026-06-21-01-idea-design.md-reverse-engineering/` — research notes plus cherry-picked upstream reference material under `reference/` (spec, lint rules, worked examples). See `reference/SOURCE.md` for provenance (Apache-2.0, attributed).
 
 ## Workspace Structure
 
@@ -19,7 +20,7 @@ Ephemeral work and handoffs. Subfolders:
 - **handoffs/** — Agent-to-agent or session-to-session handoffs. Format: clear summary of work done, what's next, any blockers. Include timestamps and task IDs.
 - **evidence/** — Screenshots, test output, diffs, logs. Name by task ID for traceability. Link from handoffs.
 - **archive/** — Zipped completed task documentation. Zip structure: `TASK-ID_YYYY-MM-DD.zip` containing relevant plans/handoffs/evidence.
-- **scratch/** — Ephemeral notes, brainstorms, half-formed ideas. Not permanent; see hygiene below.
+- **scratch/** — Ephemeral notes, brainstorms, half-formed ideas. Not permanent; see hygiene below. **Reference-material convention:** downloaded repo zips are cherry-pick sources only — they are git-ignored (`scratch/**/*.zip`) and stay local. Extract just the needed files into a `reference/` subfolder (tracked) and record provenance in `reference/SOURCE.md`.
 
 ## Filenaming Convention
 
