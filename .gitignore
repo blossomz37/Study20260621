@@ -67,3 +67,6 @@ Thumbs.db
 
 # Claude Code local settings (machine-specific)
 .claude/settings.local.json
+
+# Manually distributed artifacts (skill packages, zips)
+.manual-distributed/
