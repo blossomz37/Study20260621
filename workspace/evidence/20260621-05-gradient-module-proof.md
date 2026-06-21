@@ -71,3 +71,24 @@ swatch background-image: == banner background-image   (sameToken: true)
 The banner and the swatch chips paint the **identical** gradient because both
 reference `{gradients.hero}` — no drift. The hero wash and radial glow render as
 designed (violet→pink→amber with a blue bloom upper-left).
+
+## 4. QA follow-up — light-on-amber at mobile width (fixed)
+
+A review audit found a viewport-dependent legibility issue: at desktop the hero
+copy stays over the darker violet/pink end (fine), but on a tall **mobile** banner
+the lower sub-text lines reach the light **amber** end (#f59e0b), where near-white
+`on-primary` text drops to ≈2:1 — below AA and visibly washing out. This violates
+the DESIGN.md's own contract ("keep saturated gradient text on the darker violet
+end for legibility").
+
+Fix (`index.html`-only — no token change, no re-export): a `text-shadow: 0 1px 3px
+rgba(11,8,24,0.5)` legibility scrim on the headline + sub-text — the same
+treatment applied to the glass demo. Verified at mobile (375px): the amber-region
+lines separate cleanly with dark glyph edges.
+
+Note: text-shadow is a *perceptual* mitigation, not a measured-ratio fix. The
+deeper finding is in the linter — its gradient/glass contrast advisory checks text
+against the gradient's **darkest** stop, which is the *most favorable* stop for
+light text and so under-warns; a conservative advisory should check the
+**worst-case** stop (min contrast across all stops). Flagged for a follow-up to
+`scripts/validate.py` (see the session notes / handoff).

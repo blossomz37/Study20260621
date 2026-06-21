@@ -52,6 +52,13 @@
       z-index: -1;                                /* behind text, above the wash */
       background-image: var(--hero-glow-bg-image);     /* <- gradients.glow */
     }
+    /* Legibility scrim: light text crosses the whole violet->pink->amber wash, and
+       on a tall (mobile) banner the lower lines reach the light amber end. A subtle
+       dark text-shadow keeps the copy legible over the warm end where contrast
+       against a single stop would otherwise drop below AA. Structural mechanic —
+       there is no text-shadow token type. */
+    .hero-banner__headline,
+    .hero-banner__sub { text-shadow: 0 1px 3px rgba(11, 8, 24, 0.5); }
     .hero-banner__headline {
       font: var(--type-display-lg);
       letter-spacing: var(--type-display-lg-tracking);
