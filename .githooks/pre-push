@@ -1,0 +1,53 @@
+#!/bin/sh
+# Pre-push safety gate. Blocks a push if the tracked tree contains
+# personal paths, secrets, or files that should never be committed.
+#
+# Enabled via: git config core.hooksPath .githooks
+# Bypass (use only when you are certain): git push --no-verify
+
+set -u
+fail=0
+
+emit() {
+  if [ "$fail" -eq 0 ]; then
+    echo ""
+    echo "  PRE-PUSH BLOCKED — review before pushing:"
+    echo ""
+  fi
+  echo "  ✗ $1"
+  fail=1
+}
+
+# 1. Absolute home paths (any username) — portable leak check.
+hits=$(git grep -I -n -E '/(Users|home)/[A-Za-z0-9._-]+/' -- . ':(exclude).githooks/*' 2>/dev/null)
+[ -n "$hits" ] && emit "Absolute home path(s) found:
+$hits"
+
+# 2. Machine-local Claude settings must never be tracked.
+if git ls-files --error-unmatch .claude/settings.local.json >/dev/null 2>&1; then
+  emit ".claude/settings.local.json is tracked (should be gitignored)"
+fi
+
+# 3. .env files must never be tracked.
+envs=$(git ls-files | grep -E '(^|/)\.env($|\.)' || true)
+[ -n "$envs" ] && emit ".env file(s) tracked:
+$envs"
+
+# 4. Private key headers.
+keys=$(git grep -I -n -E 'BEGIN (RSA |EC |OPENSSH |PGP |DSA )?PRIVATE KEY' -- . 2>/dev/null)
+[ -n "$keys" ] && emit "Private key header(s) found:
+$keys"
+
+# 5. Common secret patterns (AWS access key id, generic high-entropy assignments).
+secrets=$(git grep -I -n -E 'AKIA[0-9A-Z]{16}|(api[_-]?key|secret|token|password)["'"'"' ]*[:=]["'"'"' ]*[A-Za-z0-9/+]{20,}' -- . ':(exclude).githooks/*' 2>/dev/null)
+[ -n "$secrets" ] && emit "Possible secret(s) found:
+$secrets"
+
+if [ "$fail" -ne 0 ]; then
+  echo ""
+  echo "  Fix the above, or bypass intentionally with: git push --no-verify"
+  echo ""
+  exit 1
+fi
+
+exit 0
