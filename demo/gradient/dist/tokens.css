@@ -1,0 +1,47 @@
+:root {
+  --color-primary: #5b21b6;
+  --color-primary-strong: #4c1d95;
+  --color-on-primary: #f5f3ff;
+  --color-secondary: #2563eb;
+  --color-tertiary: #db2777;
+  --color-accent: #f59e0b;
+  --color-surface: #0b1020;
+  --color-surface-container: #141a2e;
+  --color-on-surface: #e8eaf2;
+  --color-on-surface-variant: #a9b1c7;
+  --color-outline: #2a3350;
+  --type-display-lg: 700 56px/1.05 Sora;
+  --type-display-lg-tracking: -0.02em;
+  --type-body-lg: 400 18px/1.6 Inter;
+  --type-label-caps: 600 12px/1.2 Inter;
+  --type-label-caps-tracking: 0.12em;
+  --rounded-md: 12px;
+  --rounded-lg: 20px;
+  --rounded-full: 9999px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 32px;
+  --space-xl: 64px;
+  --gradient-hero: linear-gradient(135deg, var(--color-primary) 0%, var(--color-tertiary) 55%, var(--color-accent) 100%);
+  --gradient-glow: radial-gradient(circle at 28% 18%, rgba(37,99,235,0.55) 0%, rgba(37,99,235,0) 70%);
+
+  /* components (resolved from token refs) */
+  --hero-banner-bg-image: var(--gradient-hero);
+  --hero-banner-fg: var(--color-on-primary);
+  --hero-banner-radius: var(--rounded-lg);
+  --hero-banner-pad: var(--space-xl);
+  --hero-glow-bg-image: var(--gradient-glow);
+  --swatch-hero-bg-image: var(--gradient-hero);
+  --swatch-hero-radius: var(--rounded-md);
+  --badge-bg: var(--color-surface-container);
+  --badge-fg: var(--color-on-surface);
+  --badge-font: var(--type-label-caps);
+  --badge-radius: var(--rounded-full);
+  --badge-pad: var(--space-sm);
+}
+
+/* honor the motion token contract: reduced motion collapses duration */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+  }
+}

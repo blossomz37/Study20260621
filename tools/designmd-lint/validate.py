@@ -10,22 +10,26 @@ spec-config.js, parser/spec.js), so it cannot run as-is. This script
 re-implements the *logic* of those rules in dependency-light Python (stdlib +
 PyYAML) so DESIGN.md validation is reproducible.
 
-It ALSO implements the proposed `motion` token extension
-(docs/design-md-motion-extension-proposal.md): a `motion` token group, the
-`perspective`/`transition` component sub-tokens, and four motion rules. Running
-this validator green on demo/book-flip/DESIGN.md is the step-3 proof that the
-extension closes the gap the un-extended reference linter exposed.
+It ALSO implements two proposed token extensions: `motion`
+(references/motion-extension.md) and `gradients` (references/gradient.md). Each
+adds a typed token group plus matching rules. Running this validator green on a
+demo DESIGN.md that uses the extension is the step-3 proof that the extension
+closes the gap the un-extended reference linter exposed.
 
-Rules implemented (mirroring reference/rules + the motion extension):
+Rules implemented (mirroring reference/rules + the motion/gradient extensions):
   section-order       warning   canonical section order (alias-aware)
   missing-sections    info      spacing/rounded absent while colors present
   missing-primary     error     colors.primary must be defined
   missing-typography  warning   at least one typography token
   broken-ref          error     {a.b} references must resolve; unknown sub-tokens warn
   contrast-ratio      warning   component bg/text pairs >= WCAG AA 4.5:1
+                      info      text over a gradient backgroundImage (not evaluable)
   unknown-key         warning   top-level key looks like a typo of a schema key
   motion-format       error     motion.*.duration/delay valid time; easing valid
   motion-orphaned     info      motion tokens referenced by nothing
+  gradient-stops      error     gradient needs >=2 stops; positions valid (0-100%/0-1)
+  gradient-type       warning   gradient type in {linear, radial, conic}
+  gradient-broken-ref error     each stop color {ref} must resolve
 
 Exit code: 1 if any ERROR finding, else 0. Warnings/info never fail the build.
 
@@ -55,14 +59,17 @@ SECTION_ALIASES = {
     "dos and donts": "Do's and Don'ts",
     "do's and don'ts": "Do's and Don'ts",
 }
-# Base schema keys + the proposed `motion` extension key.
+# Base schema keys + the proposed `motion` / `gradients` extension keys.
 SCHEMA_KEYS = ["version", "name", "description", "colors", "typography",
-               "rounded", "spacing", "components", "motion"]
-# Base component sub-tokens + the proposed `perspective`/`transition` props.
+               "rounded", "spacing", "components", "motion", "gradients"]
+# Base component sub-tokens + the proposed `perspective`/`transition` props and
+# the `gradients` extension's `backgroundImage` prop.
 VALID_COMPONENT_SUB_TOKENS = ["backgroundColor", "textColor", "typography",
                               "rounded", "padding", "size", "height", "width",
-                              "perspective", "transition"]
-TOKEN_GROUPS = ["colors", "typography", "rounded", "spacing", "motion", "components"]
+                              "perspective", "transition", "backgroundImage"]
+TOKEN_GROUPS = ["colors", "typography", "rounded", "spacing", "motion",
+                "gradients", "components"]
+GRADIENT_TYPES = {"linear", "radial", "conic"}
 WCAG_AA = 4.5
 EASING_KEYWORDS = {"linear", "ease", "ease-in", "ease-out", "ease-in-out",
                    "step-start", "step-end"}
@@ -163,6 +170,22 @@ def contrast(c1, c2):
     return (hi + 0.05) / (lo + 0.05)
 
 
+# --- gradient helpers --------------------------------------------------------
+
+def valid_position(p):
+    """A gradient stop position is a percentage (0–100%) or a 0–1 fraction."""
+    s = str(p).strip()
+    if s.endswith("%"):
+        try:
+            return 0.0 <= float(s[:-1]) <= 100.0
+        except ValueError:
+            return False
+    try:
+        return 0.0 <= float(s) <= 1.0
+    except ValueError:
+        return False
+
+
 # --- levenshtein (for unknown-key) -------------------------------------------
 
 def levenshtein(a, b):
@@ -249,6 +272,17 @@ def rule_contrast(fm, sections, F):
             F("warning", "contrast-ratio", f"components.{cname}",
               f"textColor on backgroundColor has contrast {r:.2f}:1, "
               f"below WCAG AA minimum {WCAG_AA}:1.")
+    # Advisory: text over a gradient background cannot be contrast-checked
+    # against a single color. Don't fail — note it (mirrors the glass C5 pattern).
+    for cname, comp in comps.items():
+        if not isinstance(comp, dict):
+            continue
+        if comp.get("backgroundImage") and comp.get("textColor") \
+                and comp.get("backgroundColor") is None:
+            F("info", "contrast-ratio", f"components.{cname}",
+              "textColor sits over a gradient backgroundImage; contrast is not "
+              "evaluable against a single color — verify legibility against the "
+              "gradient's darkest stop.")
 
 
 def rule_unknown_key(fm, sections, F):
@@ -305,9 +339,48 @@ def rule_motion_orphaned(fm, sections, F):
               "Motion token is not referenced by any component.")
 
 
+def rule_gradient(fm, sections, F):
+    grads = fm.get("gradients") or {}
+    for name, g in grads.items():
+        if not isinstance(g, dict):
+            F("error", "gradient-stops", f"gradients.{name}",
+              "Gradient token must be a map with a 'stops' list.")
+            continue
+        gtype = str(g.get("type", "linear"))
+        if gtype not in GRADIENT_TYPES:
+            F("warning", "gradient-type", f"gradients.{name}.type",
+              f"'{gtype}' is not a known gradient type "
+              f"({', '.join(sorted(GRADIENT_TYPES))}).")
+        stops = g.get("stops")
+        if not isinstance(stops, list) or len(stops) < 2:
+            F("error", "gradient-stops", f"gradients.{name}",
+              "A gradient needs at least 2 stops.")
+            continue
+        for i, st in enumerate(stops):
+            if not isinstance(st, dict):
+                F("error", "gradient-stops", f"gradients.{name}.stops[{i}]",
+                  "Each stop must be a map with 'color' (and optional 'position').")
+                continue
+            pos = st.get("position")
+            if pos is not None and not valid_position(pos):
+                F("error", "gradient-stops", f"gradients.{name}.stops[{i}].position",
+                  f"'{pos}' is not a valid stop position (0–100% or a 0–1 fraction).")
+            color = st.get("color")
+            if color is None:
+                F("error", "gradient-stops", f"gradients.{name}.stops[{i}]",
+                  "Stop is missing required 'color'.")
+            elif is_ref(color):
+                _, ok = lookup(fm, ref_path(color))
+                if not ok:
+                    F("error", "gradient-broken-ref", f"gradients.{name}.stops[{i}]",
+                      f"Reference {{{ref_path(color)}}} does not resolve to any "
+                      f"defined token.")
+
+
 RULES = [rule_section_order, rule_missing_sections, rule_missing_primary,
          rule_missing_typography, rule_broken_ref, rule_contrast,
-         rule_unknown_key, rule_motion_format, rule_motion_orphaned]
+         rule_unknown_key, rule_motion_format, rule_motion_orphaned,
+         rule_gradient]
 
 
 # --- driver ------------------------------------------------------------------

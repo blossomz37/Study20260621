@@ -7,9 +7,13 @@ One normative source (DESIGN.md) → three exports that downstream tools consume
   - tailwind.config.js   Tailwind theme.extend
   - tokens.json          DTCG (Design Token Community Group) format
 
-Implements the proposed `motion` extension: motion tokens export to
-transitionDuration/timingFunction/property (Tailwind), a DTCG `transition`
-composite, and a `--motion-*` CSS var (gated by prefers-reduced-motion).
+Implements two proposed extensions:
+  - `motion`    -> transitionDuration/timingFunction/property (Tailwind), a DTCG
+                  `transition` composite, and a `--motion-*` CSS var (gated by
+                  prefers-reduced-motion).
+  - `gradients` -> a `--gradient-*` CSS var (built into a CSS gradient string),
+                  Tailwind `backgroundImage`, and a DTCG `gradient` composite
+                  (stops in `$value`, orientation in `$extensions.designmd`).
 
 Usage:  python3 export.py demo/book-flip/DESIGN.md --out demo/book-flip/dist
 """
@@ -38,6 +42,7 @@ PROP_SUFFIX = {
     "backgroundColor": "bg", "textColor": "fg", "typography": "font",
     "rounded": "radius", "padding": "pad", "perspective": "perspective",
     "transition": "transition", "size": "size", "height": "height", "width": "width",
+    "backgroundImage": "bg-image",
 }
 
 
@@ -58,8 +63,43 @@ def ref_to_var(v):
     path = REF_RE.match(v.strip()).group(1)
     group, _, name = path.partition(".")
     prefix = {"colors": "color", "typography": "type", "rounded": "rounded",
-              "spacing": "space", "motion": "motion"}.get(group, group)
+              "spacing": "space", "motion": "motion",
+              "gradients": "gradient"}.get(group, group)
     return f"var(--{prefix}-{name})"
+
+
+def css_position(pos):
+    """Stop position -> a CSS-legal length/percentage.
+
+    The validator accepts a percentage ('0%'..'100%') or a 0–1 fraction; CSS
+    gradients require a percentage or length, so a bare fraction is scaled.
+    """
+    s = str(pos).strip()
+    if s.endswith("%") or re.search(r"(px|em|rem)$", s):
+        return s
+    try:
+        f = float(s)
+    except ValueError:
+        return s
+    return f"{f * 100:g}%" if 0.0 <= f <= 1.0 else f"{f:g}%"
+
+
+def gradient_css(g):
+    """A gradient token -> a CSS gradient string. Stop color refs become var()."""
+    gtype = g.get("type", "linear")
+    parts = []
+    for st in (g.get("stops") or []):
+        color = st.get("color", "")
+        col = ref_to_var(color) if is_ref(color) else color
+        pos = st.get("position")
+        parts.append(f"{col} {css_position(pos)}" if pos is not None else str(col))
+    stops = ", ".join(parts)
+    orient = g.get("angle")
+    if gtype == "radial":
+        return f"radial-gradient({orient or 'circle'}, {stops})"
+    if gtype == "conic":
+        return f"conic-gradient({orient or 'from 0deg'}, {stops})"
+    return f"linear-gradient({orient or '180deg'}, {stops})"
 
 
 def font_shorthand(t):
@@ -89,6 +129,8 @@ def export_css(fm):
     for name, m in (fm.get("motion") or {}).items():
         prop = m.get("property", "all")
         L.append(f"  --motion-{name}: {prop} {m.get('duration','0ms')} {m.get('easing','ease')};")
+    for name, g in (fm.get("gradients") or {}).items():
+        L.append(f"  --gradient-{name}: {gradient_css(g)};")
     L.append("")
     L.append("  /* components (resolved from token refs) */")
     for cname, comp in (fm.get("components") or {}).items():
@@ -133,12 +175,13 @@ def export_tailwind(fm):
     dur = {n: m.get("duration", "0ms") for n, m in motion.items()}
     tf = {n: m.get("easing", "ease") for n, m in motion.items()}
     tp = {n: m["property"] for n, m in motion.items() if m.get("property")}
+    bgimg = {n: gradient_css(g) for n, g in (fm.get("gradients") or {}).items()}
 
     theme = {
         "colors": colors, "borderRadius": rounded, "spacing": spacing,
         "fontFamily": families, "fontSize": fontsize,
         "transitionDuration": dur, "transitionTimingFunction": tf,
-        "transitionProperty": tp,
+        "transitionProperty": tp, "backgroundImage": bgimg,
     }
     body = json.dumps({"theme": {"extend": theme}}, indent=2)
     return ("// Generated from DESIGN.md by tools/designmd-export — do not edit by hand.\n"
@@ -181,6 +224,26 @@ def export_dtcg(fm):
                 "timingFunction": {"$type": "cubicBezier", "$value": bez},
                 "delay": {"$type": "duration", "$value": m.get("delay", "0ms")},
             }}
+    if fm.get("gradients"):
+        # DTCG defines a `gradient` composite whose $value is an array of color
+        # stops {color, position}; it does NOT standardize linear/radial or angle,
+        # so orientation goes in $extensions (the DTCG-blessed escape hatch).
+        out["gradients"] = {}
+        for n, g in fm["gradients"].items():
+            stops = []
+            for st in (g.get("stops") or []):
+                stop = {"color": st.get("color")}
+                if st.get("position") is not None:
+                    stop["position"] = st["position"]
+                stops.append(stop)
+            ext = {"type": g.get("type", "linear")}
+            if g.get("angle") is not None:
+                ext["angle"] = g["angle"]
+            out["gradients"][n] = {
+                "$type": "gradient",
+                "$value": stops,
+                "$extensions": {"designmd": ext},
+            }
     if fm.get("components"):
         out["components"] = {}
         for cn, comp in fm["components"].items():

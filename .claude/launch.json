@@ -6,6 +6,18 @@
       "runtimeExecutable": "python3",
       "runtimeArgs": ["-m", "http.server", "8765", "--directory", "demo/book-flip"],
       "port": 8765
+    },
+    {
+      "name": "gradient-demo",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8766", "--directory", "demo/gradient"],
+      "port": 8766
+    },
+    {
+      "name": "glass-demo",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8767", "--directory", "demo/glass"],
+      "port": 8767
     }
   ]
 }

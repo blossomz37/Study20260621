@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aurora Hero — gradient banner (built from exported tokens)</title>
+
+  <!-- THE TRANSFER PROOF: every design value below comes from this file,
+       generated from DESIGN.md by scripts/export.py. No literal gradient,
+       color, radius, or spacing is hand-typed in this page. -->
+  <link rel="stylesheet" href="dist/tokens.css">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ---- page chrome: structural mechanics, not design values ---- */
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: var(--space-xl);
+      background: var(--color-surface);
+      color: var(--color-on-surface);
+      font: var(--type-body-lg);
+      min-height: 100vh;
+    }
+    .wrap { max-width: 920px; margin: 0 auto; }
+    .page-eyebrow {
+      font: var(--type-label-caps);
+      letter-spacing: var(--type-label-caps-tracking);
+      text-transform: uppercase;
+      color: var(--color-on-surface-variant);
+      margin: 0 0 var(--space-md);
+    }
+
+    /* ---- hero banner: VALUES come entirely from tokens.css ---- */
+    .hero-banner {
+      position: relative;
+      isolation: isolate;                         /* structural: own stacking context */
+      overflow: hidden;                           /* structural: clip the glow */
+      background-image: var(--hero-banner-bg-image);   /* <- gradients.hero */
+      color: var(--hero-banner-fg);
+      border-radius: var(--hero-banner-radius);
+      padding: var(--hero-banner-pad);
+    }
+    /* radial glow overlay layered OVER the linear wash (per Elevation & Depth) */
+    .hero-banner__glow {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;                                /* behind text, above the wash */
+      background-image: var(--hero-glow-bg-image);     /* <- gradients.glow */
+    }
+    .hero-banner__headline {
+      font: var(--type-display-lg);
+      letter-spacing: var(--type-display-lg-tracking);
+      margin: 0 0 var(--space-md);
+      max-width: 18ch;
+    }
+    .hero-banner__sub { margin: 0; max-width: 46ch; opacity: 0.95; }
+    .hero-banner__badge {
+      display: inline-block;
+      background: var(--badge-bg);
+      color: var(--badge-fg);
+      font: var(--badge-font);
+      letter-spacing: var(--type-label-caps-tracking);
+      text-transform: uppercase;
+      border-radius: var(--badge-radius);
+      padding: var(--badge-pad) calc(var(--badge-pad) * 2);
+      margin: 0 0 var(--space-lg);
+    }
+
+    /* ---- swatch chips: same gradient token, smaller surface ---- */
+    .swatches { display: flex; gap: var(--space-md); margin-top: var(--space-xl); flex-wrap: wrap; }
+    .swatch {
+      width: 96px; height: 96px;
+      background-image: var(--swatch-hero-bg-image);   /* <- same gradients.hero */
+      border-radius: var(--swatch-hero-radius);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);       /* structural depth, not a token */
+    }
+    .caption {
+      font: var(--type-label-caps);
+      letter-spacing: var(--type-label-caps-tracking);
+      text-transform: uppercase;
+      color: var(--color-on-surface-variant);
+      margin: var(--space-lg) 0 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="page-eyebrow">Aurora Hero · recreated from exported tokens</p>
+
+    <section class="hero-banner">
+      <div class="hero-banner__glow" aria-hidden="true"></div>
+      <span class="hero-banner__badge">New release</span>
+      <h1 class="hero-banner__headline">Light on dark, from one gradient token.</h1>
+      <p class="hero-banner__sub">
+        This banner's wash is <code>var(--hero-banner-bg-image)</code> — which
+        resolves to <code>var(--gradient-hero)</code>, a violet→pink→amber linear
+        gradient defined once in DESIGN.md and exported to CSS, Tailwind, and DTCG.
+      </p>
+    </section>
+
+    <div class="swatches" aria-label="swatch chips painting the same gradient token">
+      <div class="swatch"></div>
+      <div class="swatch"></div>
+      <div class="swatch"></div>
+    </div>
+    <p class="caption">Same <code>{gradients.hero}</code> token — banner and chips never drift.</p>
+  </div>
+</body>
+</html>
