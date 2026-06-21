@@ -203,6 +203,13 @@ def draw_block(base: Image.Image, lines, font, color, cx, top_y, line_spacing,
     return xs, ys, xe, ye
 
 
+def draw_rule(base: Image.Image, cx: int, y: int, width: int, thickness: int, color: str):
+    """A short centered horizontal hairline — a tasteful divider above a byline."""
+    draw = ImageDraw.Draw(base)
+    half = width // 2
+    draw.rectangle([cx - half, y, cx + half, y + max(1, thickness)], fill=_hex_rgb(color))
+
+
 # ---------- QA: worst-case zone contrast ----------
 
 def zone_worst_contrast(bg: Image.Image, box, text_color, light_text: bool) -> float:
@@ -237,8 +244,11 @@ def compose(spec_path: Path, strict: bool = False) -> dict:
     img = src.resize((KINDLE_W, KINDLE_H), Image.LANCZOS).convert("RGBA")
     upscale_factor = KINDLE_W / src.width
 
-    # 2. scrim over the text zone
+    # 2. scrims over the text zones — title scrim (top) + an optional author scrim
+    #    (a separate gradient band, usually bottom) for the foot-of-cover byline.
+    #    Both are laid down before any text so the contrast backdrop includes them.
     scrimmed = apply_scrim(img, spec.get("scrim"))
+    scrimmed = apply_scrim(scrimmed, spec.get("author_scrim"))
     bg_for_contrast = scrimmed.copy()       # measure contrast against bg only (pre-text)
 
     # 3. resolve safe-zone box (normalized -> px)
@@ -277,22 +287,40 @@ def compose(spec_path: Path, strict: bool = False) -> dict:
     tbox = draw_block(canvas, title_lines, tfont, spec["text_color"], cx, int(title_top),
                       line_spacing, stroke=stroke, shadow=shadow)
 
-    # 5. author line below the title block
+    # 5. author byline — in its own zone (default: foot of the cover) or, for
+    #    back-compat, tucked below the title when no author_zone is given.
     author = spec.get("author")
     abox = None
     if author:
         a_axes = spec.get("author_axes")
-        a_size = max(10, round(size * float(spec.get("author_scale", 0.32))))
-        afont = resolve_font(manifest, spec["author_font"], a_size, a_axes)
-        # letter-tracking via spacing string (Pillow has no tracking; insert thin spaces)
+        acolor = spec.get("author_color", spec["text_color"])
+        # letter-tracking via spacing string (Pillow has no tracking metric)
         track = int(spec.get("author_tracking", 0))
         atext = (" " * track).join(list(author)) if track else author
-        a_gap = int(float(spec.get("author_gap", 0.02)) * KINDLE_H)
-        a_y = tbox[3] + a_gap
-        acolor = spec.get("author_color", spec["text_color"])
+        a_max = max(10, round(size * float(spec.get("author_scale", 0.30))))
+        az = spec.get("author_zone")
+        if az:
+            zx, zy = int(az["x"] * KINDLE_W), int(az["y"] * KINDLE_H)
+            zw, zh = int(az["w"] * KINDLE_W), int(az["h"] * KINDLE_H)
+            acx = zx + zw // 2
+            a_size = fit_title(manifest, spec["author_font"], a_axes, [atext], zw, zh, 1.0, a_max)
+            afont = resolve_font(manifest, spec["author_font"], a_size, a_axes)
+            a_y = zy + max(0, (zh - cap_height(afont)) // 2)   # vertically centered in the zone
+        else:
+            a_size = a_max
+            afont = resolve_font(manifest, spec["author_font"], a_size, a_axes)
+            acx = cx
+            a_y = tbox[3] + int(float(spec.get("author_gap", 0.02)) * KINDLE_H)
         a_stroke = {"width": max(1, round(cap_height(afont) * float(spec["stroke"]["width"]))),
                     "color": spec["stroke"]["color"]} if spec.get("stroke") else None
-        abox = draw_block(canvas, [atext], afont, acolor, cx, a_y, 1.0, stroke=a_stroke,
+        # optional hairline divider above the byline (a vintage/editorial touch)
+        rule = spec.get("author_rule")
+        if rule:
+            r_w = int(float(rule.get("width", 0.18)) * KINDLE_W)
+            r_th = max(1, round(float(rule.get("thickness", 0.002)) * KINDLE_H))
+            r_gap = round(float(rule.get("gap", 0.018)) * KINDLE_H)
+            draw_rule(canvas, acx, a_y - r_gap, r_w, r_th, rule.get("color", acolor))
+        abox = draw_block(canvas, [atext], afont, acolor, acx, a_y, 1.0, stroke=a_stroke,
                           shadow=shadow)
 
     final = canvas.convert("RGB")
@@ -313,8 +341,9 @@ def compose(spec_path: Path, strict: bool = False) -> dict:
     thumb = final.resize((THUMB_W, thumb_h), Image.LANCZOS)
     thumb_cap_px = cap * (THUMB_W / KINDLE_W)
     contrast = zone_worst_contrast(bg_for_contrast, tbox, spec["text_color"], light_text)
-    author_contrast = (zone_worst_contrast(bg_for_contrast, abox,
-                       spec.get("author_color", spec["text_color"]), light_text)
+    a_color = spec.get("author_color", spec["text_color"])
+    a_light = _rel_lum(_hex_rgb(a_color)) > 0.5      # author may sit in a different regime
+    author_contrast = (zone_worst_contrast(bg_for_contrast, abox, a_color, a_light)
                        if abox else None)
     ratio = KINDLE_H / KINDLE_W
     max_lines = int(spec.get("max_lines", 2))

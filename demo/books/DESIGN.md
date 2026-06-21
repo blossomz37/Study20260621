@@ -347,9 +347,16 @@ only in ink and whether a scrim is present.
   no scrim. This is an ordinary opaque pair and is held to full WCAG AA. Used by
   Julian Pike.
 
-The **author line** uses the `cover-author` role with the same ink as its zone; on
-`cover-cream` it switches to `cover-ink-dark`. The per-book face, case, tracking,
-and safe-zone box are instance data in `cover-spec.yaml`.
+The **author byline** sits at the **foot of the cover** (not under the title), in its
+own zone, using the `cover-author` role. Because the bottom of cover art is usually
+busy — rubble, a desk, a collage — the byline rides its **own gradient band**
+(`author_scrim`): a bottom-anchored translucent scrim that doubles as contrast aid and
+depth/texture. It is the same scrim primitive as the title's, just bottom-directed and
+tuned per art: a **dark** band lifts a light byline over dark foregrounds (Last Word,
+Signal); a **cream footer band** lifts a dark byline over a light collage and reads as
+an intentional vignette with the art softly showing through (Julian Pike). An optional
+hairline **divider rule** above the byline adds a vintage/editorial touch. The per-book
+face, ink, zone, scrim, and rule are instance data in `cover-spec.yaml`.
 
 ### The QA contract (enforced by compose.py → report.json)
 
@@ -386,6 +393,9 @@ into `tokens.css`.
   recent real comps, from the OFL library first.
 - **Do** put baked light titles only over zones the scrim can carry to AA, and
   measure every cover against the QA contract before shipping it.
+- **Do** anchor the author byline at the foot of the cover on its own gradient band —
+  use a translucent scrim there for contrast *and* depth (a dark band over dark art, a
+  cream footer over a light collage), not just flat text dropped onto busy pixels.
 - **Don't** vary flip durations between cards or sites — reference the token.
 - **Don't** use the terracotta accent more than once per card.
 - **Don't** rely on `:hover` alone — provide tap and keyboard flips.

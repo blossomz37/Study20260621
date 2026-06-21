@@ -24,9 +24,12 @@ safe_zone: { x: 0.08, y: 0.045, w: 0.84, h: 0.19 }
 line_spacing: 1.06
 v_align: 0.0
 
-author_scale: 0.24
+# author byline at the FOOT of the cover, over a bottom-up dark gradient band
+# (the desk/camera foreground is dark + busy — the scrim gives clean contrast + depth)
+author_zone: { x: 0.10, y: 0.875, w: 0.80, h: 0.08 }
+author_scrim: { color: "#04060E", opacity: 0.8, direction: bottom, hold: 0.05, extent: 0.22 }
+author_scale: 0.22
 author_tracking: 3
-author_gap: 0.012
 
 scrim: { color: "#04060E", opacity: 0.6, direction: top, extent: 0.30 }
 stroke: { width: 0.03, color: "#04060E" }

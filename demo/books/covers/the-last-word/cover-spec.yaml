@@ -22,9 +22,12 @@ safe_zone: { x: 0.07, y: 0.045, w: 0.86, h: 0.26 }
 line_spacing: 1.04
 v_align: 0.0
 
-author_scale: 0.26
+# author byline anchored at the FOOT of the cover, in its own zone over a
+# bottom-up dark gradient band (contrast + depth over the glowing-book rubble)
+author_zone: { x: 0.10, y: 0.875, w: 0.80, h: 0.085 }
+author_scrim: { color: "#04060E", opacity: 0.82, direction: bottom, hold: 0.05, extent: 0.20 }
+author_scale: 0.24
 author_tracking: 2
-author_gap: 0.012
 
 # strong top scrim, held at full strength across the whole title band (hold) before
 # fading — a plain linear fade dropped to ~12% over the bright galaxy and failed contrast

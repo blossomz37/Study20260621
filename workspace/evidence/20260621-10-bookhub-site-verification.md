@@ -34,13 +34,37 @@ The site hard-codes **no** brand value; every design value resolves from
   meta, full blurb, espresso "Buy · $12.99" CTA on parchment.
 - Mobile (375×812): single-column, cover full-width and legible.
 
-## Cover QA (Slice 3) — `report.json` gates, all PASS
+## Revision — author byline moved to the foot of the cover
+
+Per request, the author byline now sits at the **foot** of each cover (not under the
+title), each on its **own gradient band** for contrast + depth/texture:
+- **The Last Word / The Signal:** a bottom-up **dark** scrim band lifts the light
+  byline over the rubble / desk foreground.
+- **Julian Pike:** a translucent **cream footer band** (a soft vignette, art showing
+  through) lifts the dark byline over the busy collage; a hairline rule above it adds a
+  vintage touch. Byline ink darkened to `#241f1a` for margin.
+
+The tool gained `author_zone` (a normalized foot box), `author_scrim` (a second,
+bottom-directed scrim), and an optional `author_rule` hairline. All re-verified PASS.
+
+## Cover QA (Slice 3) — `report.json` gates, all PASS (after byline revision)
 
 | slug | title px | thumb-cap px | contrast | author | lines | PNG | JPG | WEBP |
 |---|---|---|---|---|---|---|---|---|
-| the-last-word | 371 | 31.9 | 14.8:1 | 7.3:1 | 2/2 | 4252K | 549K | 338K |
-| the-signal | 346 | 22.9 | 18.3:1 | 13.1:1 | 2/2 | 2708K | 296K | 144K |
-| julian-pike | 150 | 11.3 | 12.9:1 | 10.1:1 | 3/3 | 5331K | 563K | 272K |
+| the-last-word | 371 | 31.9 | 14.7:1 | 14.5:1 | 2/2 | 3939K | 498K | 294K |
+| the-signal | 346 | 22.9 | 18.3:1 | 10.3:1 | 2/2 | 2568K | 284K | 138K |
+| julian-pike | 150 | 11.3 | 12.9:1 | 9.8:1 | 3/3 | 5118K | 533K | 255K |
+
+Moving the byline onto its own scrim band *raised* author contrast across the board
+(e.g. Julian 10.1→4.8 with a thin scrim, then →9.8 with the cream footer band).
+
+**Visual evidence:** the three baked cover PNGs under `demo/books/covers/*/dist/`
+(viewed directly during the build) are the authoritative render. NOTE: the headless
+preview's screenshot compositor stopped capturing `<img>` layers mid-session (later
+captures show parchment placeholders) — but a `canvas.drawImage` pixel read of the
+in-page cover returned `242,246,255` = `#f2f6ff`, the exact baked title color, proving
+the covers raster correctly in-page; earlier-session screenshots of the same site code
+rendered the covers normally.
 
 - **Determinism:** re-running `compose.py` on a spec produced an identical PNG SHA
   (verified for the-signal and the-last-word).

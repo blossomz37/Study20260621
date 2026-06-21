@@ -36,16 +36,16 @@
   ],
   "thumbnail_cap_height_px": 11.3,
   "text_contrast": 12.87,
-  "author_contrast": 10.05,
+  "author_contrast": 9.78,
   "file_sizes_bytes": {
-    "png": 5459021,
-    "jpg": 576126,
-    "webp": 278378
+    "png": 5241069,
+    "jpg": 545592,
+    "webp": 261442
   },
   "file_sizes_kb": {
-    "png": 5331.1,
-    "jpg": 562.6,
-    "webp": 271.9
+    "png": 5118.2,
+    "jpg": 532.8,
+    "webp": 255.3
   },
   "gates": {
     "ratio_ok": true,
