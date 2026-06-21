@@ -1,0 +1,33 @@
+name: Deploy BookHub to Railway
+
+# Push-triggered Railway deploy, parity with the Pages workflow. Uses the Railway
+# CLI with a project token (GitHub secret RAILWAY_TOKEN) — no Railway GitHub App
+# OAuth needed. The service + Dockerfile/Caddyfile/railway.json already exist.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'demo/books/**'
+      - 'Dockerfile'
+      - 'Caddyfile'
+      - 'railway.json'
+      - '.railwayignore'
+      - '.github/workflows/deploy-railway.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: railway
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      - name: Deploy
+        run: railway up --service bookhub --ci
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
