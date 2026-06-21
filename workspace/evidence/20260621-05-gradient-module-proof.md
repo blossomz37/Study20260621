@@ -87,8 +87,10 @@ treatment applied to the glass demo. Verified at mobile (375px): the amber-regio
 lines separate cleanly with dark glyph edges.
 
 Note: text-shadow is a *perceptual* mitigation, not a measured-ratio fix. The
-deeper finding is in the linter — its gradient/glass contrast advisory checks text
-against the gradient's **darkest** stop, which is the *most favorable* stop for
-light text and so under-warns; a conservative advisory should check the
-**worst-case** stop (min contrast across all stops). Flagged for a follow-up to
-`scripts/validate.py` (see the session notes / handoff).
+deeper finding was in the linter — its gradient/glass contrast advisory checked
+text against the gradient's **darkest** stop, the *most favorable* stop for light
+text, so it under-warned. **Fixed:** the advisory now checks the **worst-case**
+stop (minimum contrast across all stops). The hero-banner advisory now reports
+`1.96:1 (drops below WCAG AA)` — correctly flagging the same light-on-amber
+condition this section describes. See
+`workspace/evidence/20260621-05-glass-module-proof.md` §7 for the full change.

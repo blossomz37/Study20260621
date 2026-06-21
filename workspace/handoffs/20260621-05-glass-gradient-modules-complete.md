@@ -26,7 +26,9 @@ end-to-end (gap proof → lint → export → recreate-from-exports).
   component sub-tokens.
 - **C5 contrast fix:** translucent (alpha<1) / backdrop-blurred surfaces are no
   longer false-failed; the linter downgrades to an advisory and checks text vs the
-  declared `backdrop` token's darkest stop.
+  declared `backdrop` token's **worst-case (lowest-contrast) stop** (a later
+  correction — the first cut used the darkest stop, which under-warned light text;
+  see the glass evidence §7).
 - Export: `--blur-*`/`--shadow-*` CSS vars + component `blur()`/shadow vars;
   Tailwind `backdropBlur` + `boxShadow`; DTCG native `shadow` + custom `blur`
   ($extensions-documented).

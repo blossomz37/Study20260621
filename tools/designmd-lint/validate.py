@@ -25,7 +25,7 @@ Rules implemented (mirroring reference/rules + the motion/gradient/glass extensi
   broken-ref          error     {a.b} references must resolve; unknown sub-tokens warn
   contrast-ratio      warning   opaque component bg/text pairs >= WCAG AA 4.5:1
                       info      gradient/translucent/blurred surface (C5: advisory,
-                                checked vs the declared backdrop's darkest stop)
+                                checked vs the worst-case / lowest-contrast stop)
   unknown-key         warning   top-level key looks like a typo of a schema key
   motion-format       error     motion.*.duration/delay valid time; easing valid
   motion-orphaned     info      motion tokens referenced by nothing
@@ -230,22 +230,29 @@ def alpha_of(s):
     return 1.0
 
 
-def darkest_stop_color(fm, gradient_path):
-    """Resolve a gradient token to the RGB of its darkest (lowest-luminance) stop."""
+def worst_stop_contrast(fm, gradient_path, txc):
+    """Lowest contrast ratio between text color `txc` and ANY stop of the gradient.
+
+    A gradient has no single background color, so the safe (conservative) check
+    for an advisory is the WORST case: the stop that gives the lowest contrast for
+    this text color. (Checking the darkest stop would report the *most* favorable
+    case for light text and under-warn — the opposite of what an advisory wants.)
+    Returns the minimum ratio (float), or None if no stop color resolves.
+    """
     node, ok = lookup(fm, gradient_path)
     if not ok or not isinstance(node, dict):
         return None
-    darkest, best = None, 2.0
+    worst = None
     for st in (node.get("stops") or []):
         if not isinstance(st, dict):
             continue
         cv, _ = resolve_value(st.get("color"), fm)
         c = parse_color(cv)
         if c is not None:
-            lum = luminance(c)
-            if lum < best:
-                best, darkest = lum, c
-    return darkest
+            r = contrast(c, txc)
+            if worst is None or r < worst:
+                worst = r
+    return worst
 
 
 # --- levenshtein (for unknown-key) -------------------------------------------
@@ -321,13 +328,26 @@ def rule_contrast(fm, sections, F):
             continue
         tx = comp.get("textColor")
         bg = comp.get("backgroundImage")
-        # Advisory: text over a gradient backgroundImage can't be checked against a
-        # single color — note it, don't fail (mirrors the glass C5 pattern).
+        # Advisory: text over a gradient backgroundImage has no single background
+        # color to check. Don't fail — report the WORST-CASE stop (lowest contrast
+        # for this text color), which is the conservative thing to flag.
         if bg and tx and comp.get("backgroundColor") is None:
+            txv, okt = resolve_value(tx, fm)
+            txc = parse_color(txv) if okt else None
+            if is_ref(bg) and txc is not None:
+                r = worst_stop_contrast(fm, ref_path(bg), txc)
+                if r is not None:
+                    verdict = "meets" if r >= WCAG_AA else "drops below"
+                    F("info", "contrast-ratio", f"components.{cname}",
+                      f"textColor over gradient {bg}: worst-case contrast (vs the "
+                      f"lowest-contrast stop) is {r:.2f}:1 ({verdict} WCAG AA "
+                      f"{WCAG_AA}:1; advisory — a gradient has no single background "
+                      f"color; keep text over the stops where it stays legible).")
+                    continue
             F("info", "contrast-ratio", f"components.{cname}",
               "textColor sits over a gradient backgroundImage; contrast is not "
-              "evaluable against a single color — verify legibility against the "
-              "gradient's darkest stop.")
+              "evaluable against a single color — verify against the gradient's "
+              "lowest-contrast stop.")
             continue
         bg = comp.get("backgroundColor")
         if bg is None or tx is None:
@@ -340,21 +360,21 @@ def rule_contrast(fm, sections, F):
         # its WCAG contrast against the resolved fill is meaningless (it ignores the
         # backdrop). Don't emit a failing warning; downgrade to an advisory and,
         # when the component declares its backdrop, check text vs the backdrop's
-        # darkest stop instead.
+        # WORST-CASE (lowest-contrast) stop — not the darkest stop, which would be
+        # the most favorable for light text and under-warn.
         is_glass = comp.get("backdropBlur") is not None or alpha_of(bgv) < 1.0
         txc = parse_color(txv)
         if is_glass:
             backdrop = comp.get("backdrop")
             if backdrop is not None and is_ref(backdrop) and txc is not None:
-                dark = darkest_stop_color(fm, ref_path(backdrop))
-                if dark is not None:
-                    r = contrast(dark, txc)
-                    verdict = "meets" if r >= WCAG_AA else "is below"
+                r = worst_stop_contrast(fm, ref_path(backdrop), txc)
+                if r is not None:
+                    verdict = "meets" if r >= WCAG_AA else "drops below"
                     F("info", "contrast-ratio", f"components.{cname}",
                       f"translucent/blurred surface over backdrop {backdrop}: "
-                      f"textColor vs the backdrop's darkest stop is {r:.2f}:1 "
-                      f"({verdict} WCAG AA {WCAG_AA}:1; advisory — blur and "
-                      f"translucency shift effective contrast).")
+                      f"textColor vs the backdrop's worst-case (lowest-contrast) "
+                      f"stop is {r:.2f}:1 ({verdict} WCAG AA {WCAG_AA}:1; advisory "
+                      f"— blur and translucency shift effective contrast).")
                     continue
             F("info", "contrast-ratio", f"components.{cname}",
               "translucent/blurred surface: contrast is not evaluable against the "

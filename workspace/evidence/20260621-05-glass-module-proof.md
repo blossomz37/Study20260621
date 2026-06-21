@@ -32,15 +32,17 @@ That is a false positive — the card is legible over the dark backdrop.
 
 **AFTER** (C5 fix) the linter detects the translucent/blurred surface, declines to
 fail it, and checks text against the declared `backdrop: {gradients.hero}` token's
-darkest stop:
+**worst-case (lowest-contrast) stop**:
 ```
-· info contrast-ratio [components.glass-card]  translucent/blurred surface over backdrop {gradients.hero}: textColor vs the backdrop's darkest stop is 7.91:1 (meets WCAG AA 4.5:1; advisory — blur and translucency shift effective contrast).
-· info contrast-ratio [components.glass-badge] ... 7.91:1 (meets WCAG AA ...) ...
+· info contrast-ratio [components.glass-card]  translucent/blurred surface over backdrop {gradients.hero}: textColor vs the backdrop's worst-case (lowest-contrast) stop is 1.89:1 (drops below WCAG AA 4.5:1; advisory — blur and translucency shift effective contrast).
+· info contrast-ratio [components.glass-badge] ... 1.89:1 (drops below WCAG AA ...) ...
 → PASS: 0 error(s), 0 warning(s), 2 info        exit=1→0
 ```
 
 The downgrade only applies to translucent/blurred components; opaque-surface
-contrast is unchanged, so no real failure is masked.
+contrast is unchanged, so no real failure is masked. (The advisory uses the
+worst-case stop, not the darkest — see §7; an earlier draft reported 7.91:1 vs the
+darkest violet stop, which under-warned for light text.)
 
 ## 2. Cross-check: upstream `atmospheric-glass` lints sensibly (acceptance #6)
 
@@ -99,10 +101,12 @@ A review caught a legibility bug in `index.html` (not the tooling): the decorati
 `orb--b` was filled with `var(--color-on-primary)` (#f5f3ff, near-white) and sat
 directly behind the card's near-white body text — frosted through the 10%-white
 fill it produced a ~1:1 white-on-white band. This violated the DESIGN.md's own
-"keep glass text on the darker end of the backdrop" rule. Note the linter was
-*correct*: its C5 advisory checks the declared `backdrop: {gradients.hero}` token's
-darkest stop (7.91:1) and cannot see a decorative non-token orb composited behind
-the glass (the limitation flagged in `references/glass.md` open Q #3).
+"keep glass text on the darker end of the backdrop" rule. The linter has a
+*structural* limitation here: its C5 advisory can only reason about the declared
+`backdrop: {gradients.hero}` token, not a decorative non-token orb composited
+behind the glass (`references/glass.md` open Q #3). Separately, at the time of this
+review the advisory also reported a falsely-reassuring `7.91:1` because it used the
+*darkest* stop — corrected in §7 to the worst-case stop.
 
 Fixes (both `index.html`-only — no token change, no re-export):
 - **Recolor** `orb--b` from `--color-on-primary` to `--color-tertiary` (#db2777,
@@ -112,3 +116,30 @@ Fixes (both `index.html`-only — no token change, no re-export):
 
 Verified on :8767: body text legible across the full card; `orb--b` computes to
 `rgb(219,39,119)`; no console errors. Lint/exports unchanged (demo-only edit).
+
+## 7. Linter heuristic correction — worst-case stop, not darkest
+
+The white-on-white review surfaced a deeper, correctly-attributed bug in the
+*linter* (not the demo): the C5 / gradient advisory checked text against the
+backdrop's **darkest** stop. For light text the darkest stop is the *most
+favorable* one, so the advisory under-warned — it reported `7.91:1 (meets AA)` for
+the glass card even though the same light text over the gradient's amber end is
+only ~1.9:1.
+
+Fix (`scripts/validate.py`, mirrored to `tools/`): `darkest_stop_color` →
+`worst_stop_contrast(fm, gradient_path, txc)`, which returns the **minimum**
+contrast across all stops for the given text color. Both advisory branches (glass
+`backdrop`, and text over a gradient `backgroundImage`) now report that worst case.
+Conservative on purpose: the linter can't know which region of the gradient the
+element overlaps, so it flags the worst a viewport could produce.
+
+Result after the fix (all still non-failing `info`, exit 0):
+- glass-card / glass-badge: `1.89:1 (drops below WCAG AA)` vs the worst-case amber stop.
+- gradient hero-banner: `1.96:1 (drops below WCAG AA)` — the advisory now catches
+  exactly the light-on-amber legibility issue found in the gradient demo at mobile.
+- atmospheric-glass: unchanged (no `backdrop` declared → generic "declare a
+  backdrop" advisory); still passes clean.
+
+Docs synced to match: `references/glass.md` (§5, open Q #3, appendix),
+`references/gradient.md` (§5 advisory), `SKILL.md` (gotcha + glass pointer), and
+the `validate.py` docstring. Skill re-zipped.
