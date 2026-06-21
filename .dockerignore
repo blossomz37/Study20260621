@@ -1,0 +1,4 @@
+# Keep the build context tiny: only the site folder + the Caddyfile are needed.
+*
+!Caddyfile
+!demo/books
