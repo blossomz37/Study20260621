@@ -70,3 +70,6 @@ Thumbs.db
 
 # Manually distributed artifacts (skill packages, zips)
 .manual-distributed/
+
+# Reference-only downloads dropped into scratch (cherry-pick locally; don't push)
+workspace/scratch/**/*.zip
