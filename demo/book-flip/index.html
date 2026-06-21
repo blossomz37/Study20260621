@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shelf &amp; Spine — book-cover flip (built from exported tokens)</title>
+
+  <!-- THE TRANSFER PROOF: every design value below comes from this file,
+       which was generated from DESIGN.md by tools/designmd-export. -->
+  <link rel="stylesheet" href="dist/tokens.css">
+
+  <!-- Fonts named by the design system (graceful fallback if offline) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ---- page chrome (structural, not design tokens) ---- */
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: var(--space-xl);
+      background: var(--color-surface);
+      color: var(--color-on-surface);
+      font: var(--type-body-md);
+    }
+    .page-title {
+      font: var(--type-display-lg);
+      letter-spacing: var(--type-display-lg-tracking);
+      margin: 0 0 var(--space-sm);
+    }
+    .page-sub { color: var(--color-on-surface-variant); margin: 0 0 var(--space-xl); max-width: 60ch; }
+    .hint { font: var(--type-label-caps); letter-spacing: var(--type-label-caps-tracking);
+            text-transform: uppercase; color: var(--color-on-surface-variant); }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: var(--space-gallery-gap);
+      max-width: 920px;
+    }
+
+    /* ---- flip card: structure is mechanics; all VALUES come from tokens.css ---- */
+    .book-flip {
+      aspect-ratio: var(--space-cover-aspect);
+      perspective: var(--book-flip-perspective);
+      border-radius: var(--book-flip-radius);
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(42, 33, 28, 0.14);
+      border-radius: var(--book-flip-radius);
+    }
+    .book-flip:focus-visible { outline: 3px solid var(--color-tertiary); outline-offset: 3px; }
+    .book-inner {
+      position: relative; width: 100%; height: 100%;
+      transform-style: preserve-3d;
+      transition: var(--book-flip-inner-transition);   /* <- motion token */
+    }
+    @media (hover: hover) {
+      .book-flip:hover .book-inner { transform: rotateY(180deg); }
+    }
+    .book-flip.is-flipped .book-inner { transform: rotateY(180deg); }
+
+    .book-front, .book-back {
+      position: absolute; inset: 0; overflow: hidden;
+      -webkit-backface-visibility: hidden; backface-visibility: hidden;
+      border-radius: var(--book-flip-radius);
+    }
+    .book-back { transform: rotateY(180deg); }
+
+    /* ---- front cover (rendered from tokens — proves the palette/type transfers) ---- */
+    .cover {
+      width: 100%; height: 100%;
+      display: flex; flex-direction: column; justify-content: space-between;
+      padding: var(--space-lg);
+      color: var(--color-on-primary);
+    }
+    .cover--clay      { background: var(--color-secondary); }
+    .cover--terracotta{ background: var(--color-tertiary); }
+    .cover--espresso  { background: var(--color-primary); }
+    .cover-kicker { font: var(--type-label-caps); letter-spacing: var(--type-label-caps-tracking);
+                    text-transform: uppercase; opacity: 0.85; }
+    .cover-title  { font: var(--type-headline-md); margin-top: auto; }
+    .cover-author { font: var(--type-label-caps); letter-spacing: var(--type-label-caps-tracking);
+                    text-transform: uppercase; opacity: 0.9; margin-top: var(--space-sm); }
+
+    /* ---- info back face ---- */
+    .book-back-info {
+      width: 100%; height: 100%;
+      background: var(--book-flip-back-info-bg);
+      color: var(--book-flip-back-info-fg);
+      font: var(--book-flip-back-info-font);
+      padding: var(--book-flip-back-info-pad);
+      display: flex; flex-direction: column; gap: var(--space-sm);
+    }
+    .book-title { font: var(--book-flip-title-font); color: var(--book-flip-title-fg); margin: 0; }
+    .book-meta  { font: var(--book-flip-meta-font); color: var(--book-flip-meta-fg);
+                  letter-spacing: var(--type-label-caps-tracking); text-transform: uppercase; }
+    .book-blurb { flex: 1; font: var(--book-flip-back-info-font); color: var(--book-flip-back-info-fg); margin: 0; }
+    .book-cta {
+      align-self: flex-start; text-decoration: none;
+      background: var(--book-flip-cta-bg);
+      color: var(--book-flip-cta-fg);
+      font: var(--book-flip-cta-font);
+      letter-spacing: var(--type-label-cta-tracking);
+      border-radius: var(--book-flip-cta-radius);
+      padding: var(--space-sm) var(--book-flip-cta-pad);
+    }
+    .book-cta:hover { background: var(--book-flip-cta-hover-bg); }
+
+    /* ---- image back face (back-cover mode) ---- */
+    .book-back-cover {
+      width: 100%; height: 100%;
+      background: var(--color-surface-container-high);
+      display: flex; flex-direction: column; justify-content: center;
+      align-items: center; text-align: center; gap: var(--space-sm);
+      padding: var(--space-lg);
+      color: var(--color-on-surface);
+    }
+    .book-back-cover .barcode {
+      width: 64px; height: 30px; margin-top: var(--space-md);
+      background: repeating-linear-gradient(90deg, var(--color-on-surface) 0 2px, transparent 2px 5px);
+    }
+  </style>
+</head>
+<body>
+  <h1 class="page-title">Shelf &amp; Spine</h1>
+  <p class="page-sub">
+    A book-cover flip gallery rendered entirely from <code>dist/tokens.css</code> — exported from
+    <code>DESIGN.md</code> by the pipeline. No brand color, font, radius, or timing value is
+    hard-coded here. <span class="hint">Hover · tap · or focus + Enter to flip</span>
+  </p>
+
+  <div class="gallery">
+
+    <!-- Book 1 — info mode + CTA (click-to-pin so the buy link is reachable) -->
+    <div class="book-flip" role="button" tabindex="0" data-pin
+         aria-label="The Limestone Door by A. Reyes — flip for details">
+      <div class="book-inner">
+        <div class="book-front">
+          <div class="cover cover--clay">
+            <span class="cover-kicker">A Novel</span>
+            <div>
+              <div class="cover-title">The Limestone Door</div>
+              <div class="cover-author">A. Reyes</div>
+            </div>
+          </div>
+        </div>
+        <div class="book-back">
+          <div class="book-back-info">
+            <p class="book-title">The Limestone Door</p>
+            <div class="book-meta">A. Reyes · Parchment Press · 2026</div>
+            <p class="book-blurb">A cartographer inherits a house with one more room than its blueprints allow — and a tenant who only appears in mirrors.</p>
+            <a class="book-cta" href="#buy" onclick="return false">Buy · $14.99</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Book 2 — image mode (back cover) -->
+    <div class="book-flip" role="button" tabindex="0"
+         aria-label="Salt & Cipher by M. Okonkwo — flip for back cover">
+      <div class="book-inner">
+        <div class="book-front">
+          <div class="cover cover--terracotta">
+            <span class="cover-kicker">Thriller</span>
+            <div>
+              <div class="cover-title">Salt &amp; Cipher</div>
+              <div class="cover-author">M. Okonkwo</div>
+            </div>
+          </div>
+        </div>
+        <div class="book-back">
+          <div class="book-back-cover">
+            <p class="book-title">Salt &amp; Cipher</p>
+            <p class="book-blurb">“A propulsive, salt-stung debut.” — The Tide Review</p>
+            <div class="barcode" aria-hidden="true"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Book 3 — info mode + CTA -->
+    <div class="book-flip" role="button" tabindex="0" data-pin
+         aria-label="Quiet Machines by J. Vance — flip for details">
+      <div class="book-inner">
+        <div class="book-front">
+          <div class="cover cover--espresso">
+            <span class="cover-kicker">Essays</span>
+            <div>
+              <div class="cover-title">Quiet Machines</div>
+              <div class="cover-author">J. Vance</div>
+            </div>
+          </div>
+        </div>
+        <div class="book-back">
+          <div class="book-back-info">
+            <p class="book-title">Quiet Machines</p>
+            <div class="book-meta">J. Vance · Parchment Press · 2026</div>
+            <p class="book-blurb">Fourteen essays on the tools we build to think with, and the thoughts they quietly build back.</p>
+            <a class="book-cta" href="#buy" onclick="return false">Buy · $12.99</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Ported from the source site's 593-char flip script, plus a CTA click-guard
+    // and desktop click-to-pin for cards that carry a real buy link.
+    (() => {
+      const isTouch = window.matchMedia('(hover: none)').matches;
+      const tiles = [...document.querySelectorAll('.book-flip')];
+      const closeAll = () => tiles.forEach(t => t.classList.remove('is-flipped'));
+      const toggle = (tile) => {
+        const open = tile.classList.contains('is-flipped');
+        closeAll();
+        if (!open) tile.classList.add('is-flipped');
+      };
+
+      tiles.forEach(tile => {
+        const wantsClick = isTouch || tile.hasAttribute('data-pin');
+        if (wantsClick) tile.addEventListener('click', (e) => {
+          if (e.target.closest('a, button')) return;   // don't swallow the CTA
+          toggle(tile);
+        });
+        tile.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(tile); }
+          if (e.key === 'Escape') closeAll();
+        });
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.book-flip')) closeAll();
+      });
+    })();
+  </script>
+</body>
+</html>

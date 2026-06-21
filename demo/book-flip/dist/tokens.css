@@ -1,0 +1,73 @@
+:root {
+  --color-primary: #3a2d28;
+  --color-primary-strong: #241b17;
+  --color-on-primary: #faf6f0;
+  --color-secondary: #9a6a4f;
+  --color-on-secondary: #faf6f0;
+  --color-tertiary: #b8553a;
+  --color-on-tertiary: #faf6f0;
+  --color-neutral: #f7f3ee;
+  --color-surface: #f7f3ee;
+  --color-surface-container: #efe7dd;
+  --color-surface-container-high: #e4d8ca;
+  --color-on-surface: #2a211c;
+  --color-on-surface-variant: #5c5048;
+  --color-outline: #cbbfb2;
+  --color-error: #9a3412;
+  --color-on-error: #faf6f0;
+  --type-display-lg: 600 48px/1.05 Fraunces;
+  --type-display-lg-tracking: -0.02em;
+  --type-headline-md: 600 28px/1.1 Fraunces;
+  --type-title-md: 600 22px/1.15 Fraunces;
+  --type-body-md: 400 15px/1.5 Inter;
+  --type-body-sm: 400 13px/1.45 Inter;
+  --type-label-caps: 600 11px/1.2 Inter;
+  --type-label-caps-tracking: 0.08em;
+  --type-label-cta: 600 13px/1 Inter;
+  --type-label-cta-tracking: 0.02em;
+  --rounded-sm: 4px;
+  --rounded-md: 8px;
+  --rounded-cover: 6px;
+  --rounded-full: 9999px;
+  --space-base: 8px;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 40px;
+  --space-gallery-gap: 24px;
+  --space-cover-aspect: 2 / 3;
+  --motion-flip: transform 450ms ease;
+  --motion-none: all 0ms linear;
+
+  /* components (resolved from token refs) */
+  --book-flip-perspective: 800px;
+  --book-flip-radius: var(--rounded-cover);
+  --book-flip-inner-transition: var(--motion-flip);
+  --book-flip-front-bg: var(--color-surface-container);
+  --book-flip-front-radius: var(--rounded-cover);
+  --book-flip-back-image-radius: var(--rounded-cover);
+  --book-flip-back-info-bg: var(--color-surface-container);
+  --book-flip-back-info-fg: var(--color-on-surface);
+  --book-flip-back-info-font: var(--type-body-md);
+  --book-flip-back-info-radius: var(--rounded-cover);
+  --book-flip-back-info-pad: var(--space-lg);
+  --book-flip-title-fg: var(--color-on-surface);
+  --book-flip-title-font: var(--type-title-md);
+  --book-flip-meta-fg: var(--color-on-surface-variant);
+  --book-flip-meta-font: var(--type-label-caps);
+  --book-flip-cta-bg: var(--color-primary);
+  --book-flip-cta-fg: var(--color-on-primary);
+  --book-flip-cta-font: var(--type-label-cta);
+  --book-flip-cta-radius: var(--rounded-sm);
+  --book-flip-cta-pad: var(--space-md);
+  --book-flip-cta-hover-bg: var(--color-primary-strong);
+}
+
+/* honor the motion token contract: reduced motion collapses duration */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-flip: transform 0ms linear;
+    --motion-none: all 0ms linear;
+  }
+}
