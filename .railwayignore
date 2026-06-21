@@ -1,0 +1,18 @@
+# Keep the `railway up` upload tiny — only the Docker build inputs are needed
+# (Dockerfile, Caddyfile, and the served demo/books site files). Everything the
+# running site doesn't reference is excluded; this is upload-scope only.
+.git/
+.venv/
+workspace/
+tools/
+docs/
+.github/
+.githooks/
+demo/book-flip/
+demo/gradient/
+demo/glass/
+# within demo/books: the served site uses site/assets — drop the heavy source art,
+# the cover masters/contact-sheets, and local-only reference files
+demo/books/*.png
+demo/books/books-info.md
+demo/books/covers/
