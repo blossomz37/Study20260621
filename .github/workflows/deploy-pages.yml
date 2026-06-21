@@ -1,0 +1,38 @@
+name: Deploy BookHub to GitHub Pages
+
+# Publishes ONLY demo/books/ (the BookHub site root) — not the whole repo.
+# The site page is demo/books/site/index.html; demo/books/index.html redirects to it,
+# so the Pages root URL lands on the gallery.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'demo/books/**'
+      - '.github/workflows/deploy-pages.yml'
+  workflow_dispatch:        # lets you trigger a deploy manually from the Actions tab
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deploy at a time; a newer push supersedes an in-flight run.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: demo/books          # this folder becomes the published site root
+      - id: deployment
+        uses: actions/deploy-pages@v4
